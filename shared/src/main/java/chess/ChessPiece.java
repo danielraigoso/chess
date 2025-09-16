@@ -119,6 +119,32 @@ public class ChessPiece {
             }
             return moves;
         }
+        /////////////////// KNIGHT MOVES ////////////////////////////
+
+        if (getPieceType() == PieceType.KNIGHT) {
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
+
+            int[][] knightMoves = {
+                    {+2, +1}, {+2, -1}, {-2, +1}, {-2, -1},
+                    {+1, +2}, {+1, -2}, {-1, +2}, {-1, -2}
+            };
+
+            for (int[] k : knightMoves) {
+                int r = row + k[0];
+                int c = col + k[1];
+
+                if (r < 1 || r > 8 || c < 1 || c > 8) continue;
+
+                ChessPosition to = new ChessPosition(r,c);
+                ChessPiece target = board.getPiece(to);
+
+                if (target == null || target.getTeamColor() != myColor) {
+                    moves.add(new ChessMove(myPosition, to, null));
+                }
+            }
+            return moves;
+        }
         return List.of();
     }
 }
