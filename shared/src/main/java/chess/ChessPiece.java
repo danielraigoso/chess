@@ -242,12 +242,39 @@ public class ChessPiece {
         }
         /////////////////// ROOK MOVES ////////////////////////////
         if (getPieceType() == PieceType.ROOK) {
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
+
             int[][] rookMoves = {
                     { 0, +1},  // E
                     { 0, -1},  // W
                     {-1,  0},  // S  (row-1)
                     {+1,  0}   // N  (row+1)
             };
+
+            for (int[] d : rookMoves) {
+                int r = row;
+                int c = col;
+
+                while(true) {
+                    r += d[0];
+                    c += d[1];
+                    if (r < 1 || r > 8 || c < 1 || c > 8) break;
+
+                    ChessPosition to = new ChessPosition(r,c);
+                    ChessPiece target = board.getPiece(to);
+
+                    if (target == null) {
+                        moves.add(new ChessMove(myPosition, to, null)); // empty
+                    } else {
+                        if (target.getTeamColor() != myColor) {
+                            moves.add(new ChessMove(myPosition, to , null)); //enemy captured
+                        }
+                        break; //friend or enemy, stops movement
+                    }
+                }
+            }
+            return moves;
         }
 
         return List.of();
