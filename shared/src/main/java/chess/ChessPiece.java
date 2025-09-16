@@ -286,4 +286,24 @@ public class ChessPiece {
         moves.add(new ChessMove(from, to, PieceType.ROOK));
         moves.add(new ChessMove(from, to, PieceType.KNIGHT));
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChessPiece other)) return false;
+        return this.pieceColor == other.pieceColor
+                && this.type == other.type;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = pieceColor.hashCode();
+        result = 31 * result + type.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return pieceColor + " " + type;
+    }
 }
