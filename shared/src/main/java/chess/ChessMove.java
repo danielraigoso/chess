@@ -52,14 +52,17 @@ public class ChessMove {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ChessMove that)) return false;
-        return this.getStartPosition().equals(that.getStartPosition())
-                && this.getEndPosition().equals(that.getEndPosition());
+        // start and end have to match
+        if (!this.startPosition.equals(that.startPosition)) return false;
+        if (!this.endPosition.equals(that.endPosition)) return false;
+        return this.promotionPiece == that.promotionPiece;
     }
 
     @Override
     public int hashCode() {
         int result = getStartPosition().hashCode();
         result = 31 * result + getEndPosition().hashCode();
+        result = 31 * result + (promotionPiece == null ? 0 : promotionPiece.hashCode());
         return result;
     }
 }

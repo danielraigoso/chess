@@ -145,6 +145,30 @@ public class ChessPiece {
             }
             return moves;
         }
+
+        if (getPieceType() == PieceType.PAWN){
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
+
+            // Direction and starting rows depend on color
+            boolean isWhite = (myColor == ChessGame.TeamColor.WHITE);
+            int dir = isWhite ? +1 : -1; // white pieces move up, black move down
+            int startRow = isWhite ? 2 : 7; // white pieces start row 2, black row 7
+            int promoRow = isWhite ? 8 : 1; // rows you can promote, white 8, black 1
+
+            // Forward one step if empty
+            int r1 = row + dir, c1 = col;
+            if (r1 >= 1 && r1 <= 8) {
+                ChessPosition fwd1 = new ChessPosition(r1, c1);
+                if (board.getPiece(fwd1) == null) {
+                    if (r1 == promoRow) {
+                        // promote if row is last row
+                        addPromotions(mov)
+                    }
+                }
+            }
+
+        }
         return List.of();
     }
 }
