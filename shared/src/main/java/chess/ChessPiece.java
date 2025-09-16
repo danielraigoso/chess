@@ -55,6 +55,7 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         List<ChessMove> moves = new java.util.ArrayList<>();
 
+        //////////// BISHOP MOVES ////////////////////////////
         int[][] dirs = { {+1,+1}, {-1,+1}, {-1,-1}, {+1,-1} };
 
         ChessPiece me = board.getPiece(myPosition);
