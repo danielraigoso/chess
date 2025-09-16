@@ -47,4 +47,19 @@ public class ChessMove {
     public String toString() {
         return String.format("%s%s", startPosition, endPosition);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChessMove that)) return false;
+        return this.getStartPosition().equals(that.getStartPosition())
+                && this.getEndPosition().equals(that.getEndPosition());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getStartPosition().hashCode();
+        result = 31 * result + getEndPosition().hashCode();
+        return result;
+    }
 }
