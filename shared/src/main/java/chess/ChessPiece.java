@@ -57,6 +57,9 @@ public class ChessPiece {
 
         int[][] dirs = { {+1,+1}, {-1,+1}, {-1,-1}, {+1,-1} };
 
+        ChessPiece me = board.getPiece(myPosition);
+        ChessGame.TeamColor myColor = me.getTeamColor();
+
         for (int[] d : dirs) {
             int r = myPosition.getRow();
             int c = myPosition.getColumn();
@@ -67,7 +70,18 @@ public class ChessPiece {
                 if (r < 1 || r > 8 || c < 1 || c > 8) break;
 
                 ChessPosition to = new ChessPosition(r,c);
-                moves.add(new ChessMove(myPosition,to,null));
+                ChessPiece target = board.getPiece(to);
+
+                if (target == null) {
+                    // empty square keep moving
+                    moves.add(new ChessMove(myPosition, to, null));
+                } else {
+                    // piece found
+                    if (target.getTeamColor() != myColor) {
+                        moves.add(new ChessMove(myPosition, to, null));
+                    }
+                    break; //stop after any piece
+                }
             }
         }
         return moves;
