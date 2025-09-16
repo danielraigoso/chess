@@ -163,12 +163,51 @@ public class ChessPiece {
                 if (board.getPiece(fwd1) == null) {
                     if (r1 == promoRow) {
                         // promote if row is last row
-                        addPromotions(mov)
+                        addPromotions(moves, myPosition, fwd1);
+                    } else {
+                        moves.add(new ChessMove(myPosition, fwd1, null));
+                    }
+
+                    // Forward two from the start
+                    if (row == startRow) {
+                        int r2 = row + 2 * dir;
+                        if (r2 >= 1 && r2 <= 8) {
+                            ChessPosition mid = fwd1; //square we just checked
+                            ChessPosition fwd2 = new ChessPosition(r2, c1);
+                            if (board.getPiece(mid) == null && board.getPiece(fwd2) == null) {
+                                moves.add(new ChessMove(myPosition, fwd2, null));
+                            }
+                        }
                     }
                 }
             }
 
+            //diagonal captures only if enemy there
+            int [][] cap = { {dir, -1}, {dir, +1} };
+
+            for (int d[] : cap) {
+                int rr = row + d[0], cc = col + d[1];
+                if (rr < 1 || rr > 8 || cc < 1 || cc > 8) continue;
+
+                ChessPosition diag = new ChessPosition(rr, cc);
+                ChessPiece target = board.getPiece(diag);
+                if (target != null && target.getTeamColor() != myColor) {
+                    if (rr == promoRow) {
+                        //promote on capture
+                        addPromotions(moves, myPosition, diag);
+                    } else {
+                        moves.add(new ChessMove(myPosition, diag, null));
+                    }
+                }
+            }
+            return moves;
         }
         return List.of();
+    }
+    private void addPromotions(List<ChessMove> moves, ChessPosition from, ChessPosition to) {
+        moves.add(new ChessMove(from, to, PieceType.QUEEN));
+        moves.add(new ChessMove(from, to, PieceType.BISHOP));
+        moves.add(new ChessMove(from, to, PieceType.ROOK));
+        moves.add(new ChessMove(from, to, PieceType.KNIGHT));
     }
 }
