@@ -146,6 +146,7 @@ public class ChessPiece {
             return moves;
         }
 
+        /////////////////// PAWN MOVES ////////////////////////////
         if (getPieceType() == PieceType.PAWN){
             int row = myPosition.getRow();
             int col = myPosition.getColumn();
@@ -202,8 +203,56 @@ public class ChessPiece {
             }
             return moves;
         }
+
+        /////////////////// QUEEN MOVES ////////////////////////////
+        if (getPieceType() == PieceType.QUEEN) {
+
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
+
+            int[][] queenMoves = {
+                    {+1,  0}, {+1, +1}, { 0, +1}, {-1, +1},
+                    {-1,  0}, {-1, -1}, { 0, -1}, {+1, -1}
+            };
+
+            for (int[] q : queenMoves) {
+                int r = row;
+                int c = col;
+
+                while (true) {
+                    r += q[0];
+                    c += q[1];
+
+                    if (r < 1 || r > 8 || c < 1 || c > 8) break;
+
+                    ChessPosition to = new ChessPosition(r, c);
+                    ChessPiece target = board.getPiece(to);
+
+                    if (target == null) {
+                        moves.add(new ChessMove(myPosition, to, null));
+                    } else {
+                        if (target.getTeamColor() != myColor) {
+                            moves.add(new ChessMove(myPosition, to, null));
+                        }
+                        break;
+                    }
+                }
+            }
+            return moves;
+        }
+        /////////////////// ROOK MOVES ////////////////////////////
+        if (getPieceType() == PieceType.ROOK) {
+            int[][] rookMoves = {
+                    { 0, +1},  // E
+                    { 0, -1},  // W
+                    {-1,  0},  // S  (row-1)
+                    {+1,  0}   // N  (row+1)
+            };
+        }
+
         return List.of();
     }
+
     private void addPromotions(List<ChessMove> moves, ChessPosition from, ChessPosition to) {
         moves.add(new ChessMove(from, to, PieceType.QUEEN));
         moves.add(new ChessMove(from, to, PieceType.BISHOP));
