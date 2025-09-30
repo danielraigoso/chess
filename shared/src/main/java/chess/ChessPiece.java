@@ -186,7 +186,7 @@ public class ChessPiece {
             //diagonal captures only if enemy there
             int [][] cap = { {dir, -1}, {dir, +1} };
 
-            for (int d[] : cap) {
+            for (int[] d : cap) {
                 int rr = row + d[0], cc = col + d[1];
                 if (rr < 1 || rr > 8 || cc < 1 || cc > 8) continue;
 

@@ -1,6 +1,8 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -10,7 +12,11 @@ import java.util.Collection;
  */
 public class ChessGame {
 
+    public TeamColor teamTurn = TeamColor.WHITE;
+    public ChessBoard board;
     public ChessGame() {
+        this.board = new ChessBoard();
+        this.board.resetBoard();
 
     }
 
@@ -18,7 +24,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return teamTurn;
     }
 
     /**
@@ -27,7 +33,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        this.teamTurn = Objects.requireNonNull(team, "cannot be null");
     }
 
     /**
@@ -46,7 +52,12 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(startPosition);
+        if (piece == null) {
+            return null;
+        }
+
+        return Collections.emptyList();
     }
 
     /**
@@ -56,7 +67,16 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        Objects.requireNonNull(move, "cannot be null");
+
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+
+        ChessPiece moving = board.getPiece(start);
+        if (moving == null) {
+            throw new InvalidMoveException("no piece at start position");
+        }
+
     }
 
     /**
@@ -96,7 +116,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = Objects.requireNonNull(board, "board cannot be null");
     }
 
     /**
@@ -105,6 +125,27 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return board;
+    }
+
+    private static  ChessGame.TeamColor colorOf(ChessPiece piece) {
+        return (piece.getTeamColor() == ChessGame.TeamColor.WHITE)
+                ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ChessGame chessGame)) {
+            return false;
+        }
+        return teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamTurn, board);
     }
 }
+
+
+
