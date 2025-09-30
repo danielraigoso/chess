@@ -76,7 +76,25 @@ public class ChessGame {
         if (moving == null) {
             throw new InvalidMoveException("no piece at start position");
         }
+        if (colorOf(moving) != teamTurn) {
+            throw new InvalidMoveException("it's not" + colorOf(moving) + "'s turn");
+        }
 
+        ChessPiece target = board.getPiece(end);
+
+        if (target != null && colorOf(target) == colorOf(moving)) {
+            throw new InvalidMoveException("cannot capture your own piece");
+        }
+
+        ChessPiece promoted = null;
+        if (move.getPromotionPiece() != null) {
+            promoted = new ChessPiece(colorOf(moving), move.getPromotionPiece());
+        }
+
+        board.addPiece(end, promoted != null ? promoted : moving);
+        board.addPiece(start, null);
+
+        teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
@@ -86,7 +104,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return false;
     }
 
     /**
@@ -96,7 +114,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return false;
     }
 
     /**
@@ -107,7 +125,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return false;
     }
 
     /**
