@@ -169,8 +169,8 @@ public class ChessGame {
     }
 
     private boolean squareAttackedBy(ChessPosition target, TeamColor attackerColor){
-        for (int r = 1; r < 8; r++) {
-            for (int c = 1; c < 8; c++) {
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
                 ChessPosition from = new ChessPosition(r,c);
                 ChessPiece pc = board.getPiece(from);
                 if (pc == null || pc.getTeamColor() != attackerColor) continue;
