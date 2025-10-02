@@ -89,6 +89,10 @@ public class ChessGame {
         if (target != null && target.getTeamColor() == moving.getTeamColor()) {
             throw new InvalidMoveException("cannot capture own piece");
         }
+        Collection<ChessMove> legal = validMoves(start);
+        if (legal == null || !containsMove(legal,move)) {
+            throw new InvalidMoveException("no can do");
+        }
 
         ChessPiece placed = (move.getPromotionPiece() != null)
                 ? new ChessPiece(moving.getTeamColor(), move.getPromotionPiece())
@@ -212,6 +216,18 @@ public class ChessGame {
                 for (ChessMove m : pc.pieceMoves(board,from)) {
                     if (moveKeepsKingSafe(side,from,m)) return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean containsMove(Collection<ChessMove> moves, ChessMove target) {
+        for (ChessMove m : moves) {
+            boolean samePromotion = (m.getPromotionPiece() == target.getPromotionPiece());
+            if (m.getStartPosition().equals(target.getStartPosition())
+                && m.getEndPosition().equals(target.getEndPosition())
+                && samePromotion) {
+                return true;
             }
         }
         return false;
