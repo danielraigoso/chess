@@ -158,7 +158,7 @@ public class ChessGame {
     private static TeamColor opposite(TeamColor c) {
         return (c == TeamColor.WHITE) ? TeamColor.BLACK: TeamColor.WHITE;
     }
-
+// function to find the king
     private ChessPosition findKing(TeamColor color) {
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
@@ -172,7 +172,7 @@ public class ChessGame {
         return null;
     }
 
-
+// helper function
     private boolean squareAttackedBy(ChessPosition target, TeamColor attackerColor){
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
@@ -187,7 +187,7 @@ public class ChessGame {
         }
         return false;
     }
-
+// helper function
     private boolean moveKeepsKingSafe(TeamColor side, ChessPosition start, ChessMove m) {
         ChessPiece moving = board.getPiece(start);
         ChessPiece captured = board.getPiece(m.getEndPosition());
@@ -205,7 +205,7 @@ public class ChessGame {
 
         return safe;
     }
-
+// helper function
     private boolean sideHasAnyLegalMove(TeamColor side) {
         for (int r = 1;r <= 8; r++){
             for (int c = 1; c <= 8; c++) {
