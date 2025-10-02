@@ -221,6 +221,7 @@ public class ChessGame {
         return false;
     }
 
+    //another helper
     private boolean containsMove(Collection<ChessMove> moves, ChessMove target) {
         for (ChessMove m : moves) {
             boolean samePromotion = (m.getPromotionPiece() == target.getPromotionPiece());
