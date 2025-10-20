@@ -158,6 +158,7 @@ public class ChessGame {
     private static TeamColor opposite(TeamColor c) {
         return (c == TeamColor.WHITE) ? TeamColor.BLACK: TeamColor.WHITE;
     }
+
 // function to find the king
     private ChessPosition findKing(TeamColor color) {
         for (int r = 1; r <= 8; r++) {
