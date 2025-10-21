@@ -8,7 +8,24 @@ public class DataAccessDAO implements DataAccess {
     private final GameDataDAO games = new GameDataDAO();
 
     @Override
-    public void clearAll() {
+    public void clearAll(){
+        users.clear();
+        auths.clear();
+        games.clear();
+    }
 
+    @Override
+    public UserDAO users() {
+        return users;
+    }
+
+    @Override
+    public AuthDAO auths() {
+        return auths;
+    }
+
+    @Override
+    public GameDAO games() {
+        return games;
     }
 }
