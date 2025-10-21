@@ -112,7 +112,9 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition king = findKing(teamColor);
-        if (king == null) return false;
+        if (king == null) {
+            return false;
+        }
         return squareAttackedBy(king,opposite(teamColor));
     }
 
@@ -179,10 +181,14 @@ public class ChessGame {
             for (int c = 1; c <= 8; c++) {
                 ChessPosition from = new ChessPosition(r,c);
                 ChessPiece pc = board.getPiece(from);
-                if (pc == null || pc.getTeamColor() != attackerColor) continue;
+                if (pc == null || pc.getTeamColor() != attackerColor) {
+                    continue;
+                }
 
                 for (ChessMove m : pc.pieceMoves(board, from)) {
-                    if (m.getEndPosition().equals(target)) return true;
+                    if (m.getEndPosition().equals(target)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -212,10 +218,14 @@ public class ChessGame {
             for (int c = 1; c <= 8; c++) {
                 ChessPosition from = new ChessPosition(r,c);
                 ChessPiece pc = board.getPiece(from);
-                if (pc == null || pc.getTeamColor() != side) continue;
+                if (pc == null || pc.getTeamColor() != side) {
+                    continue;
+                }
 
                 for (ChessMove m : pc.pieceMoves(board,from)) {
-                    if (moveKeepsKingSafe(side,from,m)) return true;
+                    if (moveKeepsKingSafe(side,from,m)) {
+                        return true;
+                    }
                 }
             }
         }
