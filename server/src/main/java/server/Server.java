@@ -3,10 +3,12 @@ package server;
 import com.google.gson.Gson;
 import io.javalin.*;
 import model.UserData;
+import model.GameData;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessDAO;
 import service.ServiceException;
 import service.UserService;
+import service.GameService;
 
 public class Server {
 
