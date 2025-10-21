@@ -45,5 +45,12 @@ public class GameDataDAO implements GameDAO{
         if (game == null) {
             throw new DataAccessException("null game");
         }
+
+        int id = game.gameID();
+        if (!games.containsKey(id)) {
+            throw new DataAccessException("game not found: " + id);
+        }
+
+        games.put(id,game);
     }
 }
