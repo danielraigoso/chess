@@ -80,17 +80,29 @@ public class ChessBoard {
     }
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ChessBoard other)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ChessBoard other)) {
+            return false;
+        }
 
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
                 ChessPiece a = this.squares[r][c];
                 ChessPiece b = other.squares[r][c];
-                if (a == b) continue;            // both null or same
-                if (a == null || b == null) return false;
-                if (a.getPieceType() != b.getPieceType()) return false;
-                if (a.getTeamColor() != b.getTeamColor()) return false;
+                if (a == b) {
+                    continue;            // both null or same
+                }
+                if (a == null || b == null) {
+                    return false;
+                }
+                if (a.getPieceType() != b.getPieceType()) {
+                    return false;
+                }
+                if (a.getTeamColor() != b.getTeamColor()) {
+                    return false;
+                }
             }
         }
         return true;
@@ -113,3 +125,4 @@ public class ChessBoard {
         return h;
     }
 }
+//comment to push
