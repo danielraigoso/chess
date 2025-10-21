@@ -22,7 +22,9 @@ public class GameService {
     public int create(String authToken, String gameName)
         throws ServiceException {
         requireAuth(authToken);
-        if (isBlank(gameName)) throw new ServiceException(400, "Error: bad request");
+        if (isBlank(gameName)) {
+            throw new ServiceException(400, "Error: bad request");
+        }
         try {
             var game = db.games().create(gameName);
             return game.gameID();
@@ -42,11 +44,15 @@ public class GameService {
 
     public void join(String authToken, ChessGame.TeamColor color, Integer gameID) throws ServiceException {
         var username = requireAuth(authToken);
-        if (color == null || gameID == null) throw new ServiceException(400, "Error: bad request");
+        if (color == null || gameID == null) {
+            throw new ServiceException(400, "Error: bad request");
+        }
 
         var game = db.games().find(gameID);
 
-        if (game == null) throw new ServiceException(400, "Error: bad request");
+        if (game == null) {
+            throw new ServiceException(400, "Error: bad request");
+        }
 
         switch (color) {
             case WHITE -> {

@@ -15,7 +15,9 @@ public class UserDataDAO implements UserDAO {
             throw new DataAccessException("use fields null");
         }
         var prior = users.putIfAbsent(user.username(),user);
-        if (prior != null) throw new DataAccessException("username taken");
+        if (prior != null) {
+            throw new DataAccessException("username taken");
+        }
     }
 
     @Override

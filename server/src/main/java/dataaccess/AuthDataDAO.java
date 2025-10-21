@@ -16,7 +16,9 @@ public class AuthDataDAO implements AuthDAO {
             throw new DataAccessException("auth fields null");
         }
         var prior = auths.putIfAbsent(auth.authToken(), auth);
-        if (prior != null) throw new DataAccessException("duplicate auth token");
+        if (prior != null) {
+            throw new DataAccessException("duplicate auth token");
+        }
     }
 
     @Override
