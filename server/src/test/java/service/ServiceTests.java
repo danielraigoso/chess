@@ -6,7 +6,7 @@ import dataaccess.DataAccessDAO;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-
+//service tests, no http
 public class ServiceTests {
     private UserService userSvc;
     private GameService gameSvc;
