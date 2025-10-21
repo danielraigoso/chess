@@ -52,11 +52,19 @@ public class ChessMove {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ChessMove that)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ChessMove that)) {
+            return false;
+        }
         // start and end have to match
-        if (!this.startPosition.equals(that.startPosition)) return false;
-        if (!this.endPosition.equals(that.endPosition)) return false;
+        if (!this.startPosition.equals(that.startPosition)) {
+            return false;
+        }
+        if (!this.endPosition.equals(that.endPosition)) {
+            return false;
+        }
         return this.promotionPiece == that.promotionPiece;
     }
 
