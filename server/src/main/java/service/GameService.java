@@ -51,7 +51,22 @@ public class GameService {
         switch (color) {
             case WHITE -> {
                 if (game.whiteUsername() != null & !Objects.equals(game.whiteUsername(), username)) {
-                    throw
+                    throw new ServiceException(403, "Error: already taken");
+                }
+                var updated = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
+                try {db.games().update(updated);}
+                catch (DataAccessException dae) {
+                    throw new ServiceException(500, "Error: " + dae.getMessage());
+                }
+            }
+            case BLACK -> {
+                if (game.blackUsername() != null && !Objects.equals(game.blackUsername(), username)) {
+                    throw new ServiceException(403, "Error: already taken");
+                }
+                var updated = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
+                try {db.games().update(updated);}
+                catch (DataAccessException dae) {
+                    throw new ServiceException(500, "Error: " + dae.getMessage());
                 }
             }
         }
