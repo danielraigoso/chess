@@ -3,6 +3,7 @@ package service;
 import model.UserData;
 import model.GameData;
 import dataaccess.DataAccessDAO;
+import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,6 +43,22 @@ public class ServiceTests {
         var user = new UserData("ethan", "pw", "e@e.com");
         userSvc.register(user);
         assertThrows(ServiceException.class, () -> userSvc.register(user));
+    }
+
+    @Test
+    public void loginSuccess() throws Exception {
+        var user = new UserData("chris", "pw", "c@c.com");
+        userSvc.register(user);
+        var auth = userSvc.login(user);
+        assertNotNull(auth.authToken());
+    }
+
+    @Test
+    public void loginFail() throws Exception {
+        var user = new UserData("chris", "pw", "c@c.com");
+        userSvc.register(user);
+        var wrong = new UserData("chris", "wrongpw", "c@c.com");
+        assertThrows(ServiceException.class, () -> userSvc.login(wrong));
     }
 
 
