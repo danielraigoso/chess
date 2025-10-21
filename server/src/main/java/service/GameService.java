@@ -38,8 +38,24 @@ public class GameService {
         return new ArrayList<>(db.games().list());
     }
 
+    //put game, join as white/black
 
+    public void join(String authToken, ChessGame.TeamColor color, Integer gameID) throws ServiceException {
+        var username = requireAuth(authToken);
+        if (color == null || gameID == null) throw new ServiceException(400, "Error: bad request");
 
+        var game = db.games().find(gameID);
+
+        if (game == null) throw new ServiceException(400, "Error: bad request");
+
+        switch (color) {
+            case WHITE -> {
+                if (game.whiteUsername() != null & !Objects.equals(game.whiteUsername(), username)) {
+                    throw
+                }
+            }
+        }
+    }
     //helper method
     private String requireAuth(String token)
         throws ServiceException {
