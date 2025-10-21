@@ -93,10 +93,13 @@ public class Server {
             try {
                 var token = ctx.header("authorization");
                 var req = gson.fromJson(ctx.body(), JoinReq.class);
-                var color = parse
+                var color = parseColor(req.playerColor());
+                gameSvc.join(token, color, req.gameID());
+                ctx.status(200).json(new Empty());
+            } catch (ServiceException se) {
+                    ctx.status(se.statusCode()).json(new Message(se.getMessage()));
             }
-        }
-
+        });
     }
 
     public int run(int desiredPort) {
