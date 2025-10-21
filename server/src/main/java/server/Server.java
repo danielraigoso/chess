@@ -62,7 +62,7 @@ public class Server {
 
         javalin.delete("/db", ctx -> {
             clearSvc.clear();
-            ctx.status(200).json(new Empty());
+            ctx.status(200).result(gson.toJson(new Empty()));
         });
 
         // game stuff
@@ -71,9 +71,9 @@ public class Server {
                 var token = ctx.header("authorization");
                 var req = gson.fromJson(ctx.body(), CreateReq.class);
                 int gameID = gameSvc.create(token, req.gameName());
-                ctx.status(200).json(new CreateRes(gameID));
+                ctx.status(200).result(gson.toJson(new CreateRes(gameID)));
             } catch (ServiceException se) {
-                ctx.status(se.statusCode()).json(new Message(se.getMessage()));
+                ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
             }
         });
 
@@ -82,9 +82,9 @@ public class Server {
             try {
                 var token = ctx.header("authorization");
                 var games = gameSvc.list(token);
-                ctx.status(200).json(new ListRes(games));
+                ctx.status(200).result(gson.toJson(new ListRes(games)));
             } catch (ServiceException se) {
-                ctx.status(se.statusCode()).json(new Message(se.getMessage()));
+                ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
             }
         });
 
@@ -95,9 +95,9 @@ public class Server {
                 var req = gson.fromJson(ctx.body(), JoinReq.class);
                 var color = parseColor(req.playerColor());
                 gameSvc.join(token, color, req.gameID());
-                ctx.status(200).json(new Empty());
+                ctx.status(200).result(gson.toJson(new Empty()));
             } catch (ServiceException se) {
-                    ctx.status(se.statusCode()).json(new Message(se.getMessage()));
+                    ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
             }
         });
     }
