@@ -64,4 +64,5 @@ public class Server {
 
     private record Message(String message) {}
     private record AuthOut(String username, String authToken) {}
+    private record Empty() {}
 }
