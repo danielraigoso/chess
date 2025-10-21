@@ -64,11 +64,11 @@ public class ServiceTests {
 
     //logout success and fail
     @Test
-    public void loutOutSuccess() throws Exception {
+    public void logOutSuccess() throws Exception {
         var user = new UserData("chris", "pw", "c@c.com");
         var auth = userSvc.register(user);
-        var ex = assertThrows(ServiceException.class, () -> userSvc.logout(auth.authToken()));
-        assertEquals(401, ex.statusCode());
+        assertDoesNotThrow(() -> userSvc.logout(auth.authToken()));
+
     }
 
     @Test
