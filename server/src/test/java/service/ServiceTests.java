@@ -20,6 +20,7 @@ public class ServiceTests {
         clearSvc = new ClearService(db);
     }
 
+    // clear
     @Test
     public void clearSuccess() throws Exception {
         var user = new UserData("daniel", "pw", "d@d.com");
@@ -57,6 +58,21 @@ public class ServiceTests {
         userSvc.register(user);
         var wrong = new UserData("chris", "wrongpw", "c@c.com");
         assertThrows(ServiceException.class, () -> userSvc.login(wrong));
+    }
+
+    //logout
+    @Test
+    public void loutOutSuccess() throws Exception {
+        var user = new UserData("chris", "pw", "c@c.com");
+        var auth = userSvc.register(user);
+        var ex = assertThrows(ServiceException.class, () -> userSvc.logout(auth.authToken()));
+        assertEquals(401, ex.statusCode());
+    }
+
+    @Test
+    public void logOutFail() throws Exception {
+        var ex = assertThrows(ServiceException.class, () -> userSvc.logout("badtoken"));
+        assertEquals(401, ex.statusCode());
     }
 
     @Test
