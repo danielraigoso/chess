@@ -40,5 +40,29 @@ public class UserService {
         }
     }
 
-    public AuthData
+    public AuthData login (UserData req) throws ServiceException {
+        if (req == null || isBlank(req.username()) || isBlank(req.password())) {
+            throw new ServiceException(400, "Error: bad request");
+        }
+
+        try {
+            var user = db.users().find(req.username());
+
+            if (user == null || !req.password().equals(user.password())) {
+                throw new ServiceException(401, "Error: wrong password");
+            }
+
+            var token = UUID.randomUUID().toString();
+            var auth = new AuthData(token, user.username());
+            db.auths().insert(auth);
+
+            return auth;
+        } catch (ServiceException se) {
+            throw se;
+        } catch (DataAccessException dae) {
+            throw new ServiceException(500, "Error: " + dae.getMessage());
+        }
+    }
+
+
 }
