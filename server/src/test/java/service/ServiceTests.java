@@ -73,7 +73,7 @@ public class ServiceTests {
 
     @Test
     public void logOutFail() throws Exception {
-        var ex = assertThrows(ServiceException.class, () -> userSvc.logout("badtoken"));
+        var ex = assertThrows(ServiceException.class, () -> userSvc.logout("not-a-token"));
         assertEquals(401, ex.statusCode());
     }
 
@@ -85,7 +85,7 @@ public class ServiceTests {
         int gameID = gameSvc.create(auth.authToken(), "Test");
         assertTrue(gameID > 0);
     }
-
+    //comment
     @Test
     public void createUnauthorizedGame() {
         assertThrows(ServiceException.class, () -> gameSvc.create("badtoken", "game"));
