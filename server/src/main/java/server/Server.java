@@ -30,6 +30,16 @@ public class Server {
             }
         });
 
+        javalin.post("/session", ctx -> {
+           try {
+               var req = gson.fromJson(ctx.body(), UserData.class);
+               var auth = userSvc.login(req);
+               ctx.status(200).result(gson.toJson(new AuthOut(auth.username(), auth.authToken())));
+           } catch (ServiceException se) {
+               ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
+           }
+        });
+
 
 
     }
