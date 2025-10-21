@@ -34,14 +34,14 @@ public class UserService {
             db.auths().insert(auth);
             return auth;
 
-            } catch (ServiceException se) {
-                throw se;
-            } catch (DataAccessException dae) {
-                throw new ServiceException(500, "Error: " + dae.getMessage());
+        } catch (ServiceException se) {
+            throw se;
+        } catch (DataAccessException dae) {
+            throw new ServiceException(500, "Error: " + dae.getMessage());
         }
     }
 
-    public AuthData login (UserData req) throws ServiceException {
+    public AuthData login(UserData req) throws ServiceException {
         if (req == null || isBlank(req.username()) || isBlank(req.password())) {
             throw new ServiceException(400, "Error: bad request");
         }
@@ -72,5 +72,6 @@ public class UserService {
         }
         db.auths().delete(authToken);
     }
+}
 
 
