@@ -102,7 +102,7 @@ public class ChessPiece {
         pawnCaptureMoves(b, from, moves);
         return moves;
     }
-
+    // pawn diagonal stuff
     private void pawnForwardMoves(ChessBoard b, ChessPosition from, List<ChessMove> out) {
         var myColor = pieceColor;
         int row = from.getRow();
