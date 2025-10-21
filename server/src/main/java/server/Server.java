@@ -5,7 +5,6 @@ import io.javalin.*;
 import model.UserData;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessDAO;
-import org.eclipse.jetty.http.HttpTester;
 import service.ServiceException;
 import service.UserService;
 
@@ -20,6 +19,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
+        // Register POST
         javalin.post("/user", ctx -> {
             try {
                 var req = gson.fromJson(ctx.body(), UserData.class);
@@ -30,6 +30,7 @@ public class Server {
             }
         });
 
+        // login  POST
         javalin.post("/session", ctx -> {
            try {
                var req = gson.fromJson(ctx.body(), UserData.class);
@@ -40,8 +41,16 @@ public class Server {
            }
         });
 
-
-
+        // logout DELETE
+        javalin.delete("/session", ctx -> {
+           try {
+               var token = ctx.header("authorization");
+               userSvc.logout(token);
+               ctx.status(200).result(gson.toJson(new Empty()));
+           } catch (ServiceException se) {
+               ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
+           }
+        });
     }
 
     public int run(int desiredPort) {
@@ -53,7 +62,6 @@ public class Server {
         javalin.stop();
     }
 
-    private record Message(String message); {}
+    private record Message(String message) {}
     private record AuthOut(String username, String authToken) {}
-    private record Empty() {}
 }
