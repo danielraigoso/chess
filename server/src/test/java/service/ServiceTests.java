@@ -29,6 +29,7 @@ public class ServiceTests {
         assertThrows(ServiceException.class, () -> userSvc.login(user));
     }
 
+    //register success and fail
     @Test
     public void registerSuccess() throws Exception {
         var user = new UserData("bob", "pw", "b@b.com");
@@ -44,6 +45,7 @@ public class ServiceTests {
         assertThrows(ServiceException.class, () -> userSvc.register(user));
     }
 
+    //login success and fail
     @Test
     public void loginSuccess() throws Exception {
         var user = new UserData("chris", "pw", "c@c.com");
@@ -60,7 +62,7 @@ public class ServiceTests {
         assertThrows(ServiceException.class, () -> userSvc.login(wrong));
     }
 
-    //logout
+    //logout success and fail
     @Test
     public void loutOutSuccess() throws Exception {
         var user = new UserData("chris", "pw", "c@c.com");
@@ -75,6 +77,7 @@ public class ServiceTests {
         assertEquals(401, ex.statusCode());
     }
 
+    //create game success and fail
     @Test
     public void createGameSuccess() throws Exception {
         var user = new UserData("daniel", "pw", "d@d.com");
@@ -88,6 +91,7 @@ public class ServiceTests {
         assertThrows(ServiceException.class, () -> gameSvc.create("badtoken", "game"));
     }
 
+    // join game success and failure
     @Test
     public void successJoinGame () throws Exception {
         var user = new UserData("daniel", "pw", "d@d.com");
@@ -104,5 +108,23 @@ public class ServiceTests {
         var auth = userSvc.register(user);
         int gameID = gameSvc.create(auth.authToken(), "ColorTest");
         assertThrows(ServiceException.class, () -> gameSvc.join(auth.authToken(), null, gameID));
+    }
+
+    //list games success and  fail
+    @Test
+    public void listGamesSuccess() throws Exception {
+        var user = new UserData("daniel", "pw", "d@d.com");
+        var auth = userSvc.register(user);
+        // create a couple of games
+        gameSvc.create(auth.authToken(), "Game1");
+        gameSvc.create(auth.authToken(), "Game2");
+        var games = gameSvc.list(auth.authToken());
+        assertTrue(games.size() >= 2);
+    }
+
+    @Test
+    public void listGamesUnauthorizedFail() {
+        var ex = assertThrows(ServiceException.class, () -> gameSvc.list("invalid"));
+        assertEquals(401, ex.statusCode());
     }
 }
