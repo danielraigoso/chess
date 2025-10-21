@@ -81,7 +81,9 @@ public class GameService {
     private String requireAuth(String token)
         throws ServiceException {
         AuthData a = db.auths().find(token);
-        if (a == null) throw new ServiceException(401, "Error: unauthorized");
+        if (a == null) {
+            throw new ServiceException(401, "Error: unauthorized");
+        }
         return a.username();
     }
 
