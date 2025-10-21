@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
 
+import javax.xml.crypto.Data;
 import java.util.ServiceConfigurationError;
 import java.util.UUID;
 
@@ -64,5 +65,12 @@ public class UserService {
         }
     }
 
+    public void logout(String authToken) throws ServiceException {
+        var auth = db.auths().find(authToken);
+        if (auth == null) {
+            throw new ServiceException(401, "Error: unauthorized");
+        }
+        db.auths().delete(authToken);
+    }
 
-}
+
