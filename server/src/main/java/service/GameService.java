@@ -22,7 +22,23 @@ public class GameService {
     public int create(String authToken, String gameName)
         throws ServiceException {
         requireAuth(authToken);
+        if (isBlank(gameName)) throw new ServiceException(400, "Error: bad request");
+        try {
+            var game = db.games().create(gameName);
+            return game.gameID();
+        } catch (DataAccessException dae) {
+            throw new ServiceException(500, "Error: " + dae.getMessage());
+        }
     }
+
+    //Get game
+
+    public Collection<GameData> list(String authToken) throws ServiceException {
+        requireAuth(authToken);
+        return new ArrayList<>(db.games().list());
+    }
+
+
 
     //helper method
     private String requireAuth(String token)
