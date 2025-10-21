@@ -1,22 +1,20 @@
 package service;
 
+import chess.ChessGame;
 import model.UserData;
-import model.GameData;
 import dataaccess.DataAccessDAO;
-import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServiceTests {
-    private DataAccessDAO db;
     private UserService userSvc;
     private GameService gameSvc;
     private ClearService clearSvc;
 
     @BeforeEach
     public void setup() {
-        db = new DataAccessDAO();
+        DataAccessDAO db = new DataAccessDAO();
         userSvc = new UserService(db);
         gameSvc = new GameService(db);
         clearSvc = new ClearService(db);
@@ -61,6 +59,34 @@ public class ServiceTests {
         assertThrows(ServiceException.class, () -> userSvc.login(wrong));
     }
 
+    @Test
+    public void createGameSuccess() throws Exception {
+        var user = new UserData("daniel", "pw", "d@d.com");
+        var auth = userSvc.register(user);
+        int gameID = gameSvc.create(auth.authToken(), "Test");
+        assertTrue(gameID > 0);
+    }
 
+    @Test
+    public void createUnauthorizedGame() {
+        assertThrows(ServiceException.class, () -> gameSvc.create("badtoken", "game"));
+    }
 
+    @Test
+    public void successJoinGame () throws Exception {
+        var user = new UserData("daniel", "pw", "d@d.com");
+        var auth = userSvc.register(user);
+        int gameID = gameSvc.create(auth.authToken(), "JoinTest");
+        gameSvc.join(auth.authToken(), ChessGame.TeamColor.WHITE, gameID);
+        var list = gameSvc.list(auth.authToken());
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    public void badColor() throws Exception {
+        var user = new UserData("daniel", "pw", "d@d.com");
+        var auth = userSvc.register(user);
+        int gameID = gameSvc.create(auth.authToken(), "ColorTest");
+        assertThrows(ServiceException.class, () -> gameSvc.join(auth.authToken(), null, gameID));
+    }
 }
