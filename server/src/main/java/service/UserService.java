@@ -72,6 +72,10 @@ public class UserService {
         }
         db.auths().delete(authToken);
     }
+
+    private static boolean isBlank(String s) {
+        return s  == null || s.isBlank();
+    }
 }
 
 
