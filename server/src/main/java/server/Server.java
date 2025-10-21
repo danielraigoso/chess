@@ -14,6 +14,7 @@ public class Server {
     private final Gson gson = new Gson();
     private final DataAccess db = new DataAccessDAO();
     private final UserService userSvc = new UserService(db);
+    private final service.ClearService clearSvc = new service.ClearService(db);
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -32,24 +33,29 @@ public class Server {
 
         // login  POST
         javalin.post("/session", ctx -> {
-           try {
-               var req = gson.fromJson(ctx.body(), UserData.class);
-               var auth = userSvc.login(req);
-               ctx.status(200).result(gson.toJson(new AuthOut(auth.username(), auth.authToken())));
-           } catch (ServiceException se) {
-               ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
-           }
+            try {
+                var req = gson.fromJson(ctx.body(), UserData.class);
+                var auth = userSvc.login(req);
+                ctx.status(200).result(gson.toJson(new AuthOut(auth.username(), auth.authToken())));
+            } catch (ServiceException se) {
+                ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
+            }
         });
 
         // logout DELETE
         javalin.delete("/session", ctx -> {
-           try {
-               var token = ctx.header("authorization");
-               userSvc.logout(token);
-               ctx.status(200).result(gson.toJson(new Empty()));
-           } catch (ServiceException se) {
-               ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
-           }
+            try {
+                var token = ctx.header("authorization");
+                userSvc.logout(token);
+                ctx.status(200).result(gson.toJson(new Empty()));
+            } catch (ServiceException se) {
+                ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
+            }
+        });
+
+        javalin.delete("/db", ctx -> {
+            clearSvc.clear();
+            ctx.status(200).json(new Empty());
         });
     }
 
