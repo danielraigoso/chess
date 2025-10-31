@@ -185,7 +185,7 @@ public class DatabaseTests {
         }
 
         @Test
-        void insert_duplicate_fails() throws Exception {
+        void insertDuplicateFails() throws Exception {
             var u1 = new UserData("dup", "$2a$10$hash1", "d1@d.com");
             var u2 = new UserData("dup", "$2a$10$hash2", "d2@d.com");
             users.insert(u1);
