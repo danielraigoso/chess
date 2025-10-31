@@ -42,26 +42,21 @@ public class UserService {
     }
 
     public AuthData login(UserData req) throws ServiceException {
-        if (req == null || isBlank(req.username()) || isBlank(req.password())) {
+        if (isBlank(req.username()) || isBlank(req.password())) {
             throw new ServiceException(400, "Error: bad request");
         }
-
         try {
-            var user = db.users().find(req.username());
+            var dbUser = db.users().find(req.username());  // returns passwordHash in .password()
+            if (dbUser == null) throw new ServiceException(401, "Error: unauthorized");
 
-            if (user == null || !req.password().equals(user.password())) {
-                throw new ServiceException(401, "Error: wrong password");
-            }
+            boolean ok = org.mindrot.jbcrypt.BCrypt.checkpw(req.password(), dbUser.password());
+            if (!ok) throw new ServiceException(401, "Error: wrong password");
 
-            var token = UUID.randomUUID().toString();
-            var auth = new AuthData(token, user.username());
+            var auth = new AuthData(java.util.UUID.randomUUID().toString(), dbUser.username());
             db.auths().insert(auth);
-
             return auth;
-        } catch (ServiceException se) {
-            throw se;
-        } catch (DataAccessException dae) {
-            throw new ServiceException(500, "Error: " + dae.getMessage());
+        } catch (DataAccessException e) {
+            throw new ServiceException(500, "Error: " + e.getMessage());
         }
     }
 

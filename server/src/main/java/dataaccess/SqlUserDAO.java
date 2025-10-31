@@ -13,7 +13,7 @@ public class SqlUserDAO implements UserDAO {
         final var sql = """
             CREATE TABLE IF NOT EXISTS users (
               username VARCHAR(64) PRIMARY KEY,
-              passwordHash VARCHAR(200) NOT NULL,
+              passwordHash VARCHAR(72) NOT NULL,
               email VARCHAR(128)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         """;
@@ -38,15 +38,13 @@ public class SqlUserDAO implements UserDAO {
 
     @Override
     public void insert(UserData user) throws DataAccessException {
-        if (user == null || user.username() == null || user.password() == null) {
-            throw new DataAccessException("fields null");
-        }
-
         final var sql = "INSERT INTO users (username, passwordHash, email) VALUES (?, ?, ?)";
-        String hash = BCrypt.hashpw(user.password(), BCrypt.gensalt());
 
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
+
+            String hash = org.mindrot.jbcrypt.BCrypt.hashpw(user.password(), org.mindrot.jbcrypt.BCrypt.gensalt());
+
             stmt.setString(1, user.username());
             stmt.setString(2, hash);
             stmt.setString(3, user.email());
