@@ -98,5 +98,45 @@ public class DataTests {
         assertNotNull(list);
         assertTrue(list.isEmpty(), "list() of empty table should be empty");
     }
+
+    // update pass fail
+    @Test
+    void update_success_changeNamesAndState() throws Exception {
+        // Create base game
+        var g = games.create("Base");
+        int id = g.gameID();
+
+        var users = new SqlUserDAO();
+        users.insert(new model.UserData("whitey", "hashed", "w@e.com"));
+        users.insert(new model.UserData("blacky", "hashed", "b@e.com"));
+
+        var updated = new GameData(
+                id,
+                "whitey",
+                "blacky",
+                "Renamed",
+                null
+        );
+
+        games.update(updated);
+
+        var after = games.find(id);
+        assertNotNull(after);
+        assertEquals("Renamed", after.gameName());
+        assertEquals("whitey", after.whiteUsername());
+        assertEquals("blacky", after.blackUsername());
+    }
+
+    @Test
+    void update_fail_idNotFound() {
+        var bogus = new GameData(
+                424242,
+                null,
+                null,
+                "DoesNotExist",
+                null
+        );
+        assertThrows(DataAccessException.class, () -> games.update(bogus));
+    }
 }
 

@@ -49,6 +49,10 @@ public class SqlGameDAO implements GameDAO {
 
     @Override
     public GameData create(String gameName) throws DataAccessException {
+        if (gameName == null || gameName.isBlank()) {
+            throw new DataAccessException("game name required");
+        }
+
         final var sql = "INSERT INTO games (name) VALUES (?)";
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
