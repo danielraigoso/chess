@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.GameData;
+import model.UserData;
 import org.junit.jupiter.api.*;
 
 import java.util.Collection;
@@ -138,6 +139,71 @@ public class DatabaseTests {
                 null
         );
         assertThrows(DataAccessException.class, () -> games.update(bogus));
+    }
+
+    //user DAO tests
+
+    @Nested
+    @TestMethodOrder(MethodOrderer.DisplayName.class)
+    class SqlUserDAOTests {
+
+        private SqlUserDAO users;
+
+        @BeforeAll
+        static void bootstrapSchema() throws Exception {
+            DatabaseManager.createDatabase();
+            SqlUserDAO.createTable();
+        }
+
+        @BeforeEach
+        void setUp() throws Exception {
+            users = new SqlUserDAO();
+            users.clear();
+        }
+
+        // clear()
+        @Test
+        void clearSuccess() throws Exception {
+            users.insert(new UserData("alice", "$2a$10$hash", "a@a.com"));
+            users.clear();
+            assertNull(users.find("alice"));
+        }
+
+        // insert
+        @Test
+        void insertSuccess() throws Exception {
+            var u = new UserData("bob", "$2a$10$hash", "b@b.com");
+            users.insert(u);
+            var found = users.find("bob");
+            assertNotNull(found);
+            assertEquals("bob", found.username());
+            assertEquals("b@b.com", found.email());
+            assertEquals("$2a$10$hash", found.password());
+        }
+
+        @Test
+        void insert_duplicate_fails() throws Exception {
+            var u1 = new UserData("dup", "$2a$10$hash1", "d1@d.com");
+            var u2 = new UserData("dup", "$2a$10$hash2", "d2@d.com");
+            users.insert(u1);
+            assertThrows(DataAccessException.class, () -> users.insert(u2));
+        }
+
+        //find(String)
+
+        @Test
+        void findSuccess() throws Exception {
+            users.insert(new UserData("carol", "$2a$10$hash", "c@c.com"));
+            var found = users.find("carol");
+            assertNotNull(found);
+            assertEquals("carol", found.username());
+        }
+
+        @Test
+        void findNotFoundNull() throws DataAccessException {
+            assertNull(users.find("ghost"));
+        }
+
     }
 }
 
