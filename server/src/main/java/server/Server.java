@@ -28,6 +28,19 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
+
+        // Exception handlers that always return a JSON { "message": ... }
+        javalin.exception(service.ServiceException.class, (e, ctx) -> {
+            ctx.status(e.statusCode());
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(new Message(e.getMessage())));
+        });
+        javalin.exception(dataaccess.DataAccessException.class, (e, ctx) -> {
+            ctx.status(500);
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(new Message("Error: " + e.getMessage())));
+        });
+
         // Register POST
         javalin.post("/user", ctx -> {
             try {
