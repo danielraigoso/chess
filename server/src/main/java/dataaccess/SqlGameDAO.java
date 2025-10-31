@@ -59,5 +59,28 @@ public class SqlGameDAO implements GameDAO{
         }
     }
 
-    @ov
+    @Override
+    public GameData find(int gameID) throws DataAccessException {
+        final var sql = "SELECT id, name, whiteusername, blackusername, gameJson FROM games WHERE id = ?";
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1,gameID);
+            try (var rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new GameData(
+                            rs.getInt("id"),
+                            rs.getString("whiteusername"),
+                            rs.getString("blackusername"),
+                            rs.getString("name"),
+                            rs.getString("gameJson")
+                    );
+                }
+                return null;
+            } catch (SQLException e) {
+                throw new DataAccessException("Error finding game", e);
+            }
+
+
+        }
+    }
 }
