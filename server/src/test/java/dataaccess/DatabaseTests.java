@@ -20,6 +20,7 @@ public class DatabaseTests {
         SqlAuthDAO.createTable();
         SqlGameDAO.createTable();
     }
+    //commit and push
 
     @BeforeEach
     void setUp() throws Exception {
