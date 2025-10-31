@@ -2,7 +2,7 @@ package dataaccess;
 
 import model.GameData;
 
-import javax.xml.crypto.Data;
+import com.google.gson.Gson;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -111,10 +111,14 @@ public class SqlGameDAO implements GameDAO {
         final var sql = "UPDATE games SET name=?, whiteusername=?, blackusername=?, gameJson=? WHERE id=?";
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
+
+            Gson gson = new Gson();
+            String gameJson = gson.toJson(game.game());
+
             stmt.setString(1, game.gameName());
             stmt.setString(2, game.whiteUsername());
             stmt.setString(3, game.blackUsername());
-            stmt.setString(4, game.game());
+            stmt.setString(4, gameJson);
             stmt.setInt(5, game.gameID());
             int updated = stmt.executeUpdate();
             if (updated == 0) {
