@@ -40,7 +40,7 @@ public class Server {
             ctx.contentType("application/json");
             ctx.result(gson.toJson(new Message("Error: " + e.getMessage())));
         });
-
+// hurray passed all my phase 4 tests, time to write my own
         // Register POST
         javalin.post("/user", ctx -> {
             try {

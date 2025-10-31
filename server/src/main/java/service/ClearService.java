@@ -14,4 +14,6 @@ public class ClearService {
             throw new ServiceException(500, "Error: " + e.getMessage());
         }
     }
+
+
 }
