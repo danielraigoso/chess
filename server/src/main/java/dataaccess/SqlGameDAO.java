@@ -1,24 +1,26 @@
 package dataaccess;
 
 import model.GameData;
+
+import javax.xml.crypto.Data;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class SqlGameDAO implements GameDAO{
+public class SqlGameDAO implements GameDAO {
 
     static void createTable() throws DataAccessException {
         final var sql = """
-            CREATE TABLE IF NOT EXISTS games (
-              id INT AUTO_INCREMENT PRIMARY KEY,
-              name VARCHAR(128) NOT NULL,
-              whiteUsername VARCHAR(64),
-              blackUsername VARCHAR(64),
-              gameJson MEDIUMTEXT,
-              FOREIGN KEY (whiteUsername) REFERENCES users(username) ON DELETE SET NULL,
-              FOREIGN KEY (blackUsername) REFERENCES users(username) ON DELETE SET NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-        """;
+                    CREATE TABLE IF NOT EXISTS games (
+                      id INT AUTO_INCREMENT PRIMARY KEY,
+                      name VARCHAR(128) NOT NULL,
+                      whiteUsername VARCHAR(64),
+                      blackUsername VARCHAR(64),
+                      gameJson MEDIUMTEXT,
+                      FOREIGN KEY (whiteUsername) REFERENCES users(username) ON DELETE SET NULL,
+                      FOREIGN KEY (blackUsername) REFERENCES users(username) ON DELETE SET NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                """;
 
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
@@ -42,7 +44,7 @@ public class SqlGameDAO implements GameDAO{
     public GameData create(String gameName) throws DataAccessException {
         final var sql = "INSERT INTO games (name) VALUES (?)";
         try (var conn = DatabaseManager.getConnection();
-            var stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             var stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, gameName);
             stmt.executeUpdate();
 
@@ -64,7 +66,7 @@ public class SqlGameDAO implements GameDAO{
         final var sql = "SELECT id, name, whiteusername, blackusername, gameJson FROM games WHERE id = ?";
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1,gameID);
+            stmt.setInt(1, gameID);
             try (var rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return new GameData(
@@ -76,11 +78,34 @@ public class SqlGameDAO implements GameDAO{
                     );
                 }
                 return null;
-            } catch (SQLException e) {
-                throw new DataAccessException("Error finding game", e);
             }
-
-
+        } catch (SQLException e) {
+            throw new DataAccessException("Error finding game", e);
         }
     }
+
+    @Override
+    public Collection<GameData> list () throws DataAccessException {
+        var games = new ArrayList<GameData>();
+        final var sql = "SELECT id, name, whiteusername, blackusername, gameJson FROM games";
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql);
+             var rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                games.add(new GameData(
+                        rs.getInt("id"),
+                        rs.getString("whiteusername"),
+                        rs.getString("blackusername"),
+                        rs.getString("name"),
+                        rs.getString("gameJson")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error listing games", e);
+        }
+        return games;
+    }
+
+    @Override
 }
+
