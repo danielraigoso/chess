@@ -8,7 +8,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class DataTests {
+public class DatabaseTests {
 
     private SqlGameDAO games;
 
