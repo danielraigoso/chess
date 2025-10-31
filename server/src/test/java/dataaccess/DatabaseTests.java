@@ -1,9 +1,10 @@
 package dataaccess;
 
+import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
-
+import org.mindrot.jbcrypt.BCrypt;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -172,13 +173,15 @@ public class DatabaseTests {
         // insert
         @Test
         void insertSuccess() throws Exception {
-            var u = new UserData("bob", "$2a$10$hash", "b@b.com");
+            String plain = "pw123";
+            var u = new UserData("bob", plain, "b@b.com"); // plaintext in
             users.insert(u);
             var found = users.find("bob");
             assertNotNull(found);
             assertEquals("bob", found.username());
             assertEquals("b@b.com", found.email());
-            assertEquals("$2a$10$hash", found.password());
+            assertTrue(BCrypt.checkpw(plain, found.password()));
+            assertNotEquals(plain, found.password());
         }
 
         @Test
@@ -203,7 +206,71 @@ public class DatabaseTests {
         void findNotFoundNull() throws DataAccessException {
             assertNull(users.find("ghost"));
         }
+    }
 
+    @Nested
+    @TestMethodOrder(MethodOrderer.DisplayName.class)
+    class SqlAuthDAOTests {
+
+        private SqlAuthDAO auths;
+
+        @BeforeAll
+        static void bootstrapSchema() throws Exception {
+            DatabaseManager.createDatabase();
+            SqlAuthDAO.createTable();
+        }
+
+        @BeforeEach
+        void setUp() throws Exception {
+            auths = new SqlAuthDAO();
+            auths.clear();
+        }
+
+        // clear()
+        @Test
+        void clearSuccess() throws Exception {
+            auths.insert(new AuthData("tok1", "user1"));
+            auths.clear();
+            assertNull(auths.find("tok1"));
+        }
+
+        // insert(AuthData)
+        @Test
+        void insertSuccess() throws Exception {
+            var a = new AuthData("t123", "bob");
+            auths.insert(a);
+            var found = auths.find("t123");
+            assertNotNull(found);
+            assertEquals("bob", found.username());
+        }
+
+        @Test
+        void insertDuplicateFails() throws Exception {
+            auths.insert(new AuthData("dupTok", "u1"));
+            assertThrows(DataAccessException.class, () -> auths.insert(new AuthData("dupTok", "u2")));
+        }
+
+        // find(String)
+        @Test
+        void findSuccess() throws Exception {
+            auths.insert(new AuthData("tk", "chris"));
+            var found = auths.find("tk");
+            assertNotNull(found);
+            assertEquals("chris", found.username());
+        }
+
+        @Test
+        void findNotFoundNull() throws Exception {
+            assertNull(auths.find("none"));
+        }
+
+        // delete(String)
+        @Test
+        void deleteSuccess() throws Exception {
+            auths.insert(new AuthData("gone", "dan"));
+            auths.delete("gone");
+            assertNull(auths.find("gone"));
+        }
     }
 }
 
