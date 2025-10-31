@@ -36,7 +36,7 @@ public class DatabaseTests {
 
     // clear success
     @Test
-    void clear_success() throws Exception {
+    void clearSuccess() throws Exception {
         var g = games.create("G1");
         assertNotNull(g);
         games.clear();
@@ -46,7 +46,7 @@ public class DatabaseTests {
 
     //create(String) pass/fail
     @Test
-    void create_success() throws Exception {
+    void createSuccess() throws Exception {
         var g = games.create("MyGame");
         assertNotNull(g);
         assertTrue(g.gameID() > 0);
@@ -57,18 +57,18 @@ public class DatabaseTests {
     }
 
     @Test
-    void create_fail() {
+    void createFail() {
         assertThrows(DataAccessException.class, () -> games.create(""));
     }
 
     @Test
-    void create_fail_nullName() {
+    void createFailNullName() {
         assertThrows(DataAccessException.class, () -> games.create(null));
     }
 
     //find(int) pass fail
     @Test
-    void find_success() throws Exception {
+    void findSuccess() throws Exception {
         var created = games.create("FindMe");
         var found = games.find(created.gameID());
         assertNotNull(found);
@@ -77,14 +77,14 @@ public class DatabaseTests {
     }
 
     @Test
-    void find_notFound_returnsNull() throws Exception {
+    void findNotFoundReturnsNull() throws Exception {
         var found = games.find(999_999);
         assertNull(found, "find(nonexistent) should return null");
     }
 
     // list pass fail
     @Test
-    void list_success_multiple() throws Exception {
+    void listSuccessMultiple() throws Exception {
         games.create("A");
         games.create("B");
         var list = games.list();
@@ -94,7 +94,7 @@ public class DatabaseTests {
     }
 
     @Test
-    void list_empty_returnsEmpty() throws Exception {
+    void listEmptyReturnsEmpty() throws Exception {
         var list = games.list();
         assertNotNull(list);
         assertTrue(list.isEmpty(), "list() of empty table should be empty");
@@ -102,7 +102,7 @@ public class DatabaseTests {
 
     // update pass fail
     @Test
-    void update_success_changeNamesAndState() throws Exception {
+    void updateSuccessChangeNamesAndState() throws Exception {
         // Create base game
         var g = games.create("Base");
         int id = g.gameID();
@@ -129,7 +129,7 @@ public class DatabaseTests {
     }
 
     @Test
-    void update_fail_idNotFound() {
+    void updateFailIdNotFound() {
         var bogus = new GameData(
                 424242,
                 null,
