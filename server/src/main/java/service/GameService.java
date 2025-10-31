@@ -20,7 +20,7 @@ public class GameService {
     //Post, creates a new game
 
     public int create(String authToken, String gameName)
-        throws ServiceException {
+            throws ServiceException, DataAccessException {
         requireAuth(authToken);
         if (isBlank(gameName)) {
             throw new ServiceException(400, "Error: bad request");
@@ -35,14 +35,14 @@ public class GameService {
 
     //Get game
 
-    public Collection<GameData> list(String authToken) throws ServiceException {
+    public Collection<GameData> list(String authToken) throws ServiceException, DataAccessException {
         requireAuth(authToken);
         return new ArrayList<>(db.games().list());
     }
 
     //put game, join as white/black
 
-    public void join(String authToken, ChessGame.TeamColor color, Integer gameID) throws ServiceException {
+    public void join(String authToken, ChessGame.TeamColor color, Integer gameID) throws ServiceException, DataAccessException {
         var username = requireAuth(authToken);
         if (color == null || gameID == null) {
             throw new ServiceException(400, "Error: bad request");
@@ -79,7 +79,7 @@ public class GameService {
     }
     //helper method
     private String requireAuth(String token)
-        throws ServiceException {
+            throws ServiceException, DataAccessException {
         AuthData a = db.auths().find(token);
         if (a == null) {
             throw new ServiceException(401, "Error: unauthorized");

@@ -30,7 +30,7 @@ public class GameDataDAO implements GameDAO{
     }
 
     @Override
-    public GameData find(int gameID) {
+    public GameData find(int gameID) throws DataAccessException {
         return games.get(gameID);
     }
 
