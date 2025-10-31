@@ -47,10 +47,13 @@ public class UserService {
         }
         try {
             var dbUser = db.users().find(req.username());  // returns passwordHash in .password()
-            if (dbUser == null) throw new ServiceException(401, "Error: unauthorized");
-
+            if (dbUser == null) {
+                throw new ServiceException(401, "Error: unauthorized");
+            }
             boolean ok = org.mindrot.jbcrypt.BCrypt.checkpw(req.password(), dbUser.password());
-            if (!ok) throw new ServiceException(401, "Error: wrong password");
+            if (!ok) {
+                throw new ServiceException(401, "Error: wrong password");
+            }
 
             var auth = new AuthData(java.util.UUID.randomUUID().toString(), dbUser.username());
             db.auths().insert(auth);
