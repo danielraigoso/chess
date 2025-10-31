@@ -122,7 +122,9 @@ public class SqlGameDAO implements GameDAO {
             stmt.setString(1, game.gameName());
             stmt.setString(2, game.whiteUsername());
             stmt.setString(3, game.blackUsername());
-            if (json == null) stmt.setNull(4, Types.LONGVARCHAR); else stmt.setString(4, json);
+            if (json == null) {
+                stmt.setNull(4, Types.LONGVARCHAR);
+            } else stmt.setString(4, json);
             stmt.setInt(5, game.gameID());
 
             int updated = stmt.executeUpdate();
