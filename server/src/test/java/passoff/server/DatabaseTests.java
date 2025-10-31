@@ -22,7 +22,7 @@ public class DatabaseTests {
 
     private static Class<?> databaseManagerClass;
 
-
+    //i need to push and commit to github it aint working
     @BeforeAll
     public static void startServer() {
         server = new Server();
