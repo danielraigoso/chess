@@ -268,7 +268,7 @@ public class DatabaseTests {
         void findNotFoundNull() throws Exception {
             assertNull(auths.find("none"));
         }
-
+        //tests
         // delete(String)
         @Test
         void deleteSuccess() throws Exception {
