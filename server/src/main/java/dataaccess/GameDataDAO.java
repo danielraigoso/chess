@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import model.GameData;
 
-import javax.xml.crypto.Data;
 
 public class GameDataDAO implements GameDAO{
     private final ConcurrentHashMap<Integer, GameData> games = new ConcurrentHashMap<>();

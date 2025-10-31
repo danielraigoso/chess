@@ -3,7 +3,6 @@ package dataaccess;
 import java.util.concurrent.ConcurrentHashMap;
 import model.AuthData;
 
-import javax.xml.crypto.Data;
 
 public class AuthDataDAO implements AuthDAO {
     private final ConcurrentHashMap<String, AuthData> auths = new ConcurrentHashMap<>();
