@@ -223,7 +223,12 @@ public class DatabaseTests {
         @BeforeEach
         void setUp() throws Exception {
             auths = new SqlAuthDAO();
+            SqlUserDAO users = new SqlUserDAO();
             auths.clear();
+            users.clear();
+
+            users.insert(new UserData("user1", "pw", "u1@e.com"));
+            users.insert(new UserData("user2", "pw", "u2@e.com"));
         }
 
         // clear()
@@ -237,26 +242,26 @@ public class DatabaseTests {
         // insert(AuthData)
         @Test
         void insertSuccess() throws Exception {
-            var a = new AuthData("t123", "bob");
+            var a = new AuthData("t123", "user1");
             auths.insert(a);
             var found = auths.find("t123");
             assertNotNull(found);
-            assertEquals("bob", found.username());
+            assertEquals("user1", found.username());
         }
 
         @Test
         void insertDuplicateFails() throws Exception {
-            auths.insert(new AuthData("dupTok", "u1"));
-            assertThrows(DataAccessException.class, () -> auths.insert(new AuthData("dupTok", "u2")));
+            auths.insert(new AuthData("dupTok", "user1"));
+            assertThrows(DataAccessException.class, () -> auths.insert(new AuthData("dupTok", "user2")));
         }
 
         // find(String)
         @Test
         void findSuccess() throws Exception {
-            auths.insert(new AuthData("tk", "chris"));
+            auths.insert(new AuthData("tk", "user2"));
             var found = auths.find("tk");
             assertNotNull(found);
-            assertEquals("chris", found.username());
+            assertEquals("user2", found.username());
         }
 
         @Test
@@ -267,9 +272,15 @@ public class DatabaseTests {
         // delete(String)
         @Test
         void deleteSuccess() throws Exception {
-            auths.insert(new AuthData("gone", "dan"));
+            auths.insert(new AuthData("gone", "user1"));
             auths.delete("gone");
             assertNull(auths.find("gone"));
+        }
+
+        @Test
+        void deleteMissing() throws Exception {
+            auths.delete("missing");
+            assertNull(auths.find("missing"));
         }
     }
 }
