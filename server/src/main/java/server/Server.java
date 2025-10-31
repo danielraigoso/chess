@@ -6,6 +6,7 @@ import io.javalin.*;
 import model.UserData;
 import model.GameData;
 import dataaccess.DataAccess;
+import dataaccess.SqlDataAccessDAO;
 import dataaccess.DataAccessDAO;
 import service.ServiceException;
 import service.UserService;
@@ -18,7 +19,7 @@ public class Server {
 
     private final Javalin javalin;
     private final Gson gson = new Gson();
-    private final DataAccess db = new DataAccessDAO();
+    private final DataAccess db = new SqlDataAccessDAO();
     private final UserService userSvc = new UserService(db);
     private final service.ClearService clearSvc = new service.ClearService(db);
     private final GameService gameSvc = new GameService(db);

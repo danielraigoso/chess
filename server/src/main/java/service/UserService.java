@@ -65,7 +65,7 @@ public class UserService {
         }
     }
 
-    public void logout(String authToken) throws ServiceException {
+    public void logout(String authToken) throws ServiceException, DataAccessException {
         var auth = db.auths().find(authToken);
         if (auth == null) {
             throw new ServiceException(401, "Error: unauthorized");
