@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import model.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -108,5 +109,20 @@ public class ServerFacade {
         return gson.fromJson(response.body(), GameData.class);
     }
 
+    public void joinGame(String authToken, ChessGame.TeamColor color, int gameID) throws IOException, InterruptedException {
+        var join = new JoinGameRequest(color, gameID);
+        var body = gson.toJson(join);
 
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/game"))
+                .header("Authorization", authToken)
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new RuntimeException(response.body());
+        }
+    }
 }
