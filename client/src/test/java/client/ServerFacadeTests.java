@@ -28,8 +28,36 @@ public class ServerFacadeTests {
 
 
     @Test
-    public void sampleTest() {
-        Assertions.assertTrue(true);
+    public void clearDb() throws Exception{
+        facade.clear();
+    }
+
+    // register
+
+    @Test
+    void registerSuccess() throws Exception {
+        AuthData auth = facade.register("player1", "password", "player1@email.com");
+        assertNotNull(auth);
+        assertEquals("player1", auth.username());
+        assertNotNull(auth.authToken());
+        assertTrue(auth.authToken().length() > 5);
+    }
+
+    @Test
+    void registerDuplicateFail() throws Exception {
+        facade.register("player1", "password", "player1@email.com");
+
+        var thrown = assertThrows(Exception.class, () ->
+                facade.register("player1", "password", "player1@email.com")
+                );
+        assertTrue(thrown.getMessage().toLowerCase().contains("error"));
+    }
+
+    // login
+
+    @Test
+    void loginSuccess() throws Exception {
+        facade.register
     }
 
 }
