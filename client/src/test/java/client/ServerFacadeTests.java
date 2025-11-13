@@ -116,5 +116,39 @@ public class ServerFacadeTests {
         assertTrue(game.gameID() > 0);
     }
 
+    @Test
+    void createGameBad() throws Exception {
+        assertThrows(RuntimeException.class, () -> facade.createGame("bad-token", "naw"));
+    }
 
+
+    // join game
+
+    @Test
+    void joinGameSuccess() throws Exception {
+        AuthData auth = facade.register("heidi", "some", "heidi@email.com");
+        GameData create = facade.createGame(auth.authToken(), "join");
+
+        facade.joinGame(auth.authToken(), ChessGame.TeamColor.WHITE, create.gameID());
+
+        GameData[] games = facade.listGames(auth.authToken());
+        GameData joined = null;
+        for (GameData g : games) {
+            if (g.gameID() == create.gameID()) {
+                joined = g;
+                break;
+            }
+        }
+
+        assertNotNull(joined);
+        assertEquals("heidi", joined.whiteUsername());
+    }
+
+    @Test
+    void joinGameBad() throws Exception {
+        AuthData auth = facade.register("heidi", "some", "heidi@email.com");
+        GameData create = facade.createGame(auth.authToken(), "bad");
+
+        assertThrows(RuntimeException.class, () -> facade.joinGame("bad-token", ChessGame.TeamColor.WHITE, create.gameID()));
+    }
 }
