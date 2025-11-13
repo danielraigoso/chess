@@ -37,5 +37,25 @@ public class ServerFacade {
         return gson.fromJson(response.body(), AuthData.class);
     }
 
+    public AuthData login(String username, String password) throws IOException, InterruptedException {
+        var login = new LoginRequest(username, password);
+        var body = gson.toJson(login);
+
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/session"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new RuntimeException(response.body());
+        }
+
+        return gson.fromJson(response.body(), AuthData.class);
+    }
+
+
+
 
 }
