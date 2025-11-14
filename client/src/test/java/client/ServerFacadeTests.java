@@ -91,6 +91,13 @@ public class ServerFacadeTests {
         assertThrows(RuntimeException.class, () -> facade.logout("bad-token"));
     }
 
+    @Test
+    void logoutBad() {
+        var thrown = assertThrows(Exception.class, () -> facade.logout("bad-token")
+        );
+        assertTrue(thrown.getMessage().toLowerCase().contains("error"));
+    }
+
     // list games
 
     @Test
