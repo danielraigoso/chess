@@ -5,10 +5,14 @@ import org.junit.jupiter.api.*;
 import server.Server;
 
 import model.*;
+
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -112,8 +116,14 @@ public class ServerFacadeTests {
         AuthData auth = facade.register("heidi", "some", "heidi@email.com");
         GameData game = facade.createGame(auth.authToken(), "my game");
         assertNotNull(game);
-        assertEquals("my game", game.gameName());
         assertTrue(game.gameID() > 0);
+        GameData[] games = facade.listGames(auth.authToken());
+        GameData found = Arrays.stream(games)
+                .filter(g -> g.gameID() == game.gameID())
+                .findFirst()
+                .orElse(null);
+        assertNotNull(found);
+        assertEquals("my game", found.gameName());
     }
 
     @Test
