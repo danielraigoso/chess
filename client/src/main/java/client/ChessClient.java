@@ -19,7 +19,7 @@ public class ChessClient {
         System.out.println("Welcome to CS240 Chess!");
         System.out.println("Type 'help' to see available commmands.\n");
 
-        while(true) {
+        while (true) {
             if (authToken == null) {
                 preloginLoop();
             } else {
@@ -122,7 +122,7 @@ public class ChessClient {
         }
     }
 
-    private void printPostLoginHelp() {
+    private void printPostloginHelp() {
         System.out.println("""
                 === Post-Login Commands ===
                 help (h) - show help text
