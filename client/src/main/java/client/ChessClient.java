@@ -2,6 +2,8 @@ package client;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import model.*;
 import ui.EscapeSequences;
 
@@ -48,10 +50,6 @@ public class ChessClient {
                 System.out.println("adios!");
                 System.exit(0);
             }
-            case "create" -> System.out.println("under construction");
-            case "list" -> System.out.println("under construction");
-            case "play" -> System.out.println("under construction");
-            case "observe" -> System.out.println("under construction");
             default -> System.out.println("not recognized, type 'help' for more options");
         }
     }
@@ -118,14 +116,14 @@ public class ChessClient {
         switch (line.toLowerCase()) {
             case "help", "h" -> printPostloginHelp();
             case "logout" -> handleLogout();
+            case "create" -> handleCreateGame();
+            case "list" -> handleListGames();
+            case "play" -> handlePlayGame();
+            case "observe" -> handleObserveGame();
             case "quit", "exit", "q" -> {
                 System.out.println("adios!");
                 System.exit(0);
             }
-            case "create" -> System.out.println("under construction");
-            case "list" -> System.out.println("under construction");
-            case "play" -> System.out.println("under construction");
-            case "observe" -> System.out.println("under construction");
             default -> System.out.println("not recognized, type 'help' for more options");
         }
     }
@@ -135,10 +133,10 @@ public class ChessClient {
                 === Post-Login Commands ===
                 help (h) - show help text
                 logout   - Log out and return to main menu
-                create   - under construction
-                list     - under construction
-                play     - under construction
-                observe  - under construction
+                create   - create a new game
+                list     - list games on server
+                play     - join game
+                observe  - observe a game
                 quit (q) - exit chess
                 """);
     }
@@ -202,7 +200,7 @@ public class ChessClient {
 
     private void handlePlayGame() {
         if (cachedGames.isEmpty()) {
-            System.out.println("No games, run 'list' first.");
+            System.out.println("run 'list' first.");
             return;
         }
 
@@ -244,7 +242,7 @@ public class ChessClient {
 
     private void handleObserveGame() {
         if (cachedGames.isEmpty()) {
-            System.out.println("No cached games. Run 'list' first");
+            System.out.println("Run 'list' first");
             return;
         }
 
@@ -285,20 +283,96 @@ public class ChessClient {
 
     private void drawBoard(ChessBoard board, ChessGame.TeamColor perspective) {
         if (perspective == ChessGame.TeamColor.WHITE) {
-            draw
+            drawWhiteBoard(board);
+        } else {
+            drawBlackBoard(board);
         }
+        System.out.print(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR + "\n");
     }
 
     private void drawWhiteBoard(ChessBoard board){
+        System.out.print("   ");
+        for (char file = 'a'; file <= 'h'; file++) {
+            System.out.print(" " + file + "  ");
+        }
+        System.out.println();
 
+        for (int row = 8; row >= 1; row--){
+            System.out.print(" " + row + " ");
+            for (int col = 1; col <= 8; col++) {
+                boolean light = (row + col) % 2 == 0;
+                printSquare(board,row,col,light);
+            }
+            System.out.print(" " + row);
+            System.out.println();
+        }
+
+        System.out.print("   ");
+        for (char file = 'a'; file <= 'h'; file++) {
+            System.out.print(" " + file + "  ");
+        }
+        System.out.println();
     }
 
     private void drawBlackBoard(ChessBoard board){
+        System.out.print("   ");
+        for (char file = 'h'; file >= 'a'; file--) {
+            System.out.print(" " + file + "  ");
+        }
+        System.out.println();
 
+        for (int row = 1; row <=8; row++){
+            System.out.print(" " + row + " ");
+            for (int col = 8; col >= 1; col--) {
+                boolean light = (row + col) % 2 == 0;
+                printSquare(board,row,col,light);
+            }
+            System.out.print(" " + row);
+            System.out.println();
+        }
+
+        System.out.print("   ");
+        for (char file = 'h'; file >= 'a'; file--) {
+            System.out.print(" " + file + "  ");
+        }
+        System.out.println();
     }
 
     private void printSquare(ChessBoard board, int row, int col, boolean lightSquare){
+        ChessPosition pos = new ChessPosition(row, col);
+        ChessPiece piece = board.getPiece(pos);
 
+        String bg = lightSquare ? EscapeSequences.SET_BG_COLOR_DARK_GREY
+                : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+
+        String fg = EscapeSequences.SET_TEXT_COLOR_WHITE;
+        String glyph = EscapeSequences.EMPTY;
+
+        if (piece != null) {
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                fg = EscapeSequences.SET_TEXT_COLOR_RED;
+                glyph = switch (piece.getPieceType()) {
+                    case KING -> EscapeSequences.WHITE_KING;
+                    case QUEEN -> EscapeSequences.WHITE_QUEEN;
+                    case BISHOP -> EscapeSequences.WHITE_BISHOP;
+                    case KNIGHT -> EscapeSequences.WHITE_KNIGHT;
+                    case ROOK -> EscapeSequences.WHITE_ROOK;
+                    case PAWN -> EscapeSequences.WHITE_PAWN;
+                };
+            } else {
+                fg = EscapeSequences.SET_TEXT_COLOR_BLUE;
+                glyph = switch (piece.getPieceType()) {
+                    case KING -> EscapeSequences.BLACK_KING;
+                    case QUEEN -> EscapeSequences.BLACK_QUEEN;
+                    case BISHOP -> EscapeSequences.BLACK_BISHOP;
+                    case KNIGHT -> EscapeSequences.BLACK_KNIGHT;
+                    case ROOK -> EscapeSequences.BLACK_ROOK;
+                    case PAWN -> EscapeSequences.BLACK_PAWN;
+                };
+            }
+        }
+
+        System.out.print(bg + fg + glyph + EscapeSequences.RESET_TEXT_COLOR + EscapeSequences.RESET_BG_COLOR);
     }
 
     // helpers
