@@ -1,7 +1,13 @@
 package client;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import model.*;
+import ui.EscapeSequences;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class ChessClient {
@@ -11,13 +17,15 @@ public class ChessClient {
     private String authToken = null;
     private String username = null;
 
+    private final List<GameData> cachedGames = new ArrayList<>();
+
     public ChessClient(ServerFacade facade) {
         this.facade = facade;
     }
 
     public void run() {
         System.out.println("Welcome to CS240 Chess!");
-        System.out.println("Type 'help' to see available commmands.\n");
+        System.out.println("Type 'help' to see available commands.\n");
 
         while (true) {
             if (authToken == null) {
@@ -146,6 +154,151 @@ public class ChessClient {
         } catch (RuntimeException e) {
             System.out.println(cleanErrorMessage(e.getMessage()));
         }
+    }
+
+    private void handleCreateGame() {
+        System.out.println("Game name: ");
+        String name = scanner.nextLine().trim();
+        if (name.isBlank()) {
+            System.out.println("you gotta put something in the game name");
+            return;
+        }
+
+        try {
+            GameData game = facade.createGame(authToken, name);
+            System.out.printf("Created game '%s' (id = %d).%n", game.gameName(), game.gameID());
+        }  catch (IOException | InterruptedException e) {
+            System.out.println("Error with creating game: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println(cleanErrorMessage(e.getMessage()));
+        }
+    }
+
+    private void handleListGames() {
+        try {
+            GameData[] games = facade.listGames(authToken);
+            cachedGames.clear();
+
+            if (games == null || games.length == 0) {
+                System.out.println("No games found cuh");
+                return;
+            }
+
+            System.out.println("+++Games+++");
+            int i = 1;
+            for (GameData g: games) {
+                cachedGames.add(g);
+                String white = g.whiteUsername() == null ? "-" : g.whiteUsername();
+                String black = g.blackUsername() == null ? "-" : g.blackUsername();
+                System.out.printf("%d. %s (white: %s, black : %s)%n", i++,
+                        g.gameName(),white, black);
+            }
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Error with creating game: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println(cleanErrorMessage(e.getMessage()));
+        }
+    }
+
+    private void handlePlayGame() {
+        if (cachedGames.isEmpty()) {
+            System.out.println("No games, run 'list' first.");
+            return;
+        }
+
+        try {
+            System.out.println("Game number (from 'list'): ");
+            int num = Integer.parseInt(scanner.nextLine().trim());
+            if (num < 1 || num > cachedGames.size()) {
+                System.out.println("Invalid game number");
+                return;
+            }
+            GameData game = cachedGames.get(num - 1);
+
+            System.out.println("Color (WHITE/BLACK): ");
+            String colorStr = scanner.nextLine().trim().toUpperCase();
+            ChessGame.TeamColor color;
+            if (colorStr.equals("WHITE")) {
+                color = ChessGame.TeamColor.WHITE;
+            } else if (colorStr.equals("BLACK")) {
+                color = ChessGame.TeamColor.BLACK;
+            } else {
+                System.out.println("Color must be WHITE or BLACK.");
+                return;
+            }
+
+            facade.joinGame(authToken, color, game.gameID());
+            System.out.printf("Joined '%s' as %s. %n", game.gameName(), color);
+
+            ChessGame cg = new ChessGame();
+            cg.getBoard().resetBoard();
+            showGameBoard(cg, color);
+        } catch (NumberFormatException nfe) {
+            System.out.println("Game number must be a number");
+        } catch (IOException | InterruptedException e ){
+            System.out.println("Error joining da game: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println(cleanErrorMessage(e.getMessage()));
+        }
+    }
+
+    private void handleObserveGame() {
+        if (cachedGames.isEmpty()) {
+            System.out.println("No cached games. Run 'list' first");
+            return;
+        }
+
+        try {
+            System.out.println("Game number (from 'list'): ");
+            int num = Integer.parseInt(scanner.nextLine().trim());
+            if (num < 1 || num > cachedGames.size()) {
+                System.out.println("Invalid game number");
+                return;
+            }
+            GameData game = cachedGames.get(num -1);
+
+            facade.joinGame(authToken, null, game.gameID());
+            System.out.printf("Observing '%s' .%n", game.gameName());
+
+            ChessGame cg = new ChessGame();
+            cg.getBoard().resetBoard();
+
+            showGameBoard(cg, ChessGame.TeamColor.WHITE);
+        } catch (NumberFormatException nfe) {
+            System.out.println("Game number must be a number");
+        } catch (IOException | InterruptedException e ){
+            System.out.println("Error observing da game: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println(cleanErrorMessage(e.getMessage()));
+        }
+    }
+
+    //drawing the game board
+
+    private void showGameBoard(ChessGame game, ChessGame.TeamColor perspective) {
+        System.out.print(EscapeSequences.ERASE_SCREEN);
+        System.out.printf("Viewing board as %s. Press ENTER to return. %n", perspective);
+        drawBoard(game.getBoard(), perspective);
+        scanner.nextLine();
+        System.out.print(EscapeSequences.ERASE_SCREEN);
+    }
+
+    private void drawBoard(ChessBoard board, ChessGame.TeamColor perspective) {
+        if (perspective == ChessGame.TeamColor.WHITE) {
+            draw
+        }
+    }
+
+    private void drawWhiteBoard(ChessBoard board){
+
+    }
+
+    private void drawBlackBoard(ChessBoard board){
+
+    }
+
+    private void printSquare(ChessBoard board, int row, int col, boolean lightSquare){
+
     }
 
     // helpers
