@@ -136,6 +136,36 @@ public class ChessClient {
     }
 
     private void handleLogout() {
+        try {
+            facade.logout(authToken);
+            System.out.printf("logged out  '%s'. %n ", username);
+            this.authToken = null;
+            this.username = null;
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Error with server: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println(cleanErrorMessage(e.getMessage()));
+        }
+    }
 
+    // helpers
+    // keep clean error messages
+    private String cleanErrorMessage(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "idk what happened just now.";
+        }
+
+        raw = raw.trim();
+        if (raw.startsWith("{") && raw.contains("\"message\"")) {
+            int idx = raw.indexOf("\"message\"");
+            int colon = raw.indexOf(':', idx);
+            int quoteStart = raw.indexOf('"', colon + 1);
+            int quoteEnd = raw.indexOf('"', quoteStart + 1);
+            if (quoteStart != -1 && quoteEnd != -1) {
+                return raw.substring(quoteStart + 1, quoteEnd);
+            }
+        }
+
+        return raw;
     }
 }
