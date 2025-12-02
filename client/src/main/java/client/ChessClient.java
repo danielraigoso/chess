@@ -164,7 +164,7 @@ public class ChessClient {
 
         try {
             GameData game = facade.createGame(authToken, name);
-            System.out.printf("Created game '%s' (id = %d).%n", game.gameName(), game.gameID());
+            System.out.printf("Created game '%s'.%n", name, game.gameID());
         }  catch (IOException | InterruptedException e) {
             System.out.println("Error with creating game: " + e.getMessage());
         } catch (RuntimeException e) {
@@ -255,7 +255,7 @@ public class ChessClient {
             }
             GameData game = cachedGames.get(num -1);
 
-            facade.joinGame(authToken, null, game.gameID());
+            facade.joinGame(authToken, ChessGame.TeamColor.WHITE, game.gameID());
             System.out.printf("Observing '%s' .%n", game.gameName());
 
             ChessGame cg = new ChessGame();
@@ -275,7 +275,7 @@ public class ChessClient {
 
     private void showGameBoard(ChessGame game, ChessGame.TeamColor perspective) {
         System.out.print(EscapeSequences.ERASE_SCREEN);
-        System.out.printf("Viewing board as %s. Press ENTER to return. %n", perspective);
+        System.out.printf("Press ENTER to return. %n", perspective);
         drawBoard(game.getBoard(), perspective);
         scanner.nextLine();
         System.out.print(EscapeSequences.ERASE_SCREEN);
