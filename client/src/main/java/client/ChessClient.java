@@ -1,18 +1,15 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import model.*;
 import ui.EscapeSequences;
+import websocket.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
-public class ChessClient {
+public class ChessClient implements WebSocketComms.ServerMessageObserver {
+
     private final ServerFacade facade;
     private final Scanner scanner = new Scanner(System.in);
 
@@ -20,6 +17,12 @@ public class ChessClient {
     private String username = null;
 
     private final List<GameData> cachedGames = new ArrayList<>();
+
+    private WebSocketComms ws;
+    private ChessGame currentGame;
+    private int currentGameId;
+    private ChessGame.TeamColor currentPerspective;
+    private boolean inGame = false;
 
     public ChessClient(ServerFacade facade) {
         this.facade = facade;
