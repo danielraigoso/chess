@@ -5,6 +5,7 @@ import chess.ChessMove;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
+import server.Server;
 import service.GameService;
 import service.ServiceException;
 import websocket.commands.UserGameCommand;
@@ -46,7 +47,9 @@ public class GameWebSocketHandler {
 
     public void onError(WsErrorContext ctx){
 
-        System.out.printf
+        assert ctx.error() != null;
+        System.out.printf("Websocket Error (%s): %s%n",
+                ctx.getSessionID(), ctx.error().getMessage());
     }
 
     public void onMessage(WsMessageContext ctx) {
@@ -54,9 +57,9 @@ public class GameWebSocketHandler {
             var command = gson.fromJson(ctx.message(),UserGameCommand.class);
             switch (command.getCommandType()) {
                 case CONNECT -> handleConnect(ctx, command);
-                // case MAKE_MOVE -> handleMakeMove(ctx,command);
-                // case LEAVE -> handleLeave(ctx,command);
-                // case RESIGN -> handleResign(ctx,command);
+                case MAKE_MOVE -> handleMakeMove(ctx,command);
+                case LEAVE -> handleLeave(ctx,command);
+                case RESIGN -> handleResign(ctx,command);
             }
         } catch (ServiceException | DataAccessException ex) {
             ctx.send(gson.toJson(ServerMessage.error(ex.getMessage())));
@@ -66,12 +69,27 @@ public class GameWebSocketHandler {
     }
 
     //helper handlers
-    private void handleConnect(Session session, UserGameCommand cmd)
+    private void handleConnect(WsContext ctx, UserGameCommand cmd)
         throws ServiceException, DataAccessException {
 
         int gameID = cmd.getGameID();
         String auth = cmd.getAuthToken();
 
+        ChessGame game = gameService.loadGameState(auth, gameID);
 
+        sessionGame.put(ctx, gameID);
+        gameSessions.computeIfAbsent(gameID, id -> ConcurrentHashMap.newKeySet())
+                .add(ctx);
+
+        ctx.send(gson.toJson(ServerMessage.loadGame(game)));
+
+        String notif = gameService.buildConnectMessage(auth, gameID);
+        broadcastToOthers(gameID, ctx, ServerMessage.notification(notif));
+    }
+
+    private void handleMakeMove(WsContext ctx, UserGameCommand cmd)
+        throws ServiceException, DataAccessException {
+        int gameID = cmd.getGameID();
+        String auth
     }
 }
