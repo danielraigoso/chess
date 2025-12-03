@@ -1,6 +1,8 @@
 package websocket.messages;
 
 import chess.ChessGame;
+import model.UserData;
+
 import java.util.Objects;
 
 /**
@@ -41,6 +43,33 @@ public class ServerMessage {
     public String getErrorMessage() {
         return errorMessage;
     }
+
+    //helpers
+
+    public static ServerMessage loadGame(ChessGame game) {
+        ServerMessage msg = new ServerMessage(ServerMessageType.LOAD_GAME);
+        msg.game = game;
+        msg.message = null;
+        msg.errorMessage = null;
+        return msg;
+    }
+
+    public static ServerMessage notification(String message) {
+        ServerMessage msg = new ServerMessage(ServerMessageType.NOTIFICATION);
+        msg.game = null;
+        msg.message = message;
+        msg.errorMessage = null;
+        return msg;
+    }
+
+    public static ServerMessage error(String errorMessage) {
+        ServerMessage msg = new ServerMessage(ServerMessageType.ERROR);
+        msg.game = null;
+        msg.message = null;
+        msg.errorMessage = errorMessage;
+        return msg;
+    }
+
 
     @Override
     public boolean equals(Object o) {
