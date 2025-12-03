@@ -265,8 +265,12 @@ public class GameService {
     public String buildLeaveMessage(String authToken, int gameID)
         throws ServiceException, DataAccessException {
 
-        String username =
+        String username = requireAuth(authToken);
+
+        return username + " left the game";
     }
+
+    public string
 
     //helper method
     private String requireAuth(String token)
