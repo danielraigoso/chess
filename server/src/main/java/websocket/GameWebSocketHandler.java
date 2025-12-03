@@ -30,7 +30,7 @@ public class GameWebSocketHandler {
     }
 
     public void onConnect(WsConnectContext ctx) {
-        System.out.printf("Websocket connected: %s%n", ctx.getSessionID());
+        System.out.printf("Websocket connected: %s%n", ctx);
     }
 
     public void onClose(WsCloseContext ctx){
@@ -43,14 +43,14 @@ public class GameWebSocketHandler {
             }
         }
 
-        System.out.printf("Websocket closed: %s%n", ctx.getSessionID());
+        System.out.printf("Websocket closed: %s%n", ctx);
     }
 
     public void onError(WsErrorContext ctx){
 
         assert ctx.error() != null;
         System.out.printf("Websocket Error (%s): %s%n",
-                ctx.getSessionID(), ctx.error().getMessage());
+                ctx, ctx.error().getMessage());
     }
 
     public void onMessage(WsMessageContext ctx) {
@@ -125,6 +125,45 @@ public class GameWebSocketHandler {
             set.remove(ctx);
         }
 
-        String msg = gameService.buildLeaveMessage(auth, gameID)
+        String msg = gameService.buildLeaveMessage(auth, gameID);
+
+        broadcastToOthers(gameID, ctx, ServerMessage.notification(msg));
+    }
+
+    private void handleResign(WsContext ctx, UserGameCommand cmd)
+        throws ServiceException, DataAccessException {
+
+        int gameID = cmd.getGameID();
+        String auth = cmd.getAuthToken();
+
+        gameService.resignGame(auth, gameID);
+
+        String msg = gameService.buildResignMessage(auth, gameID);
+
+        broadcastToAll(gameID, ServerMessage.notification(msg));
+    }
+
+    private void broadcastToAll(int gameID, ServerMessage msg) {
+        var sessions = gameSessions.get(gameID);
+        if (sessions == null) return;
+
+        String json = gson.toJson(msg);
+        for (WsContext c : sessions) {
+            c.send(json);
+        }
+    }
+
+    private void broadcastToOthers(int gameID, WsContext sender, ServerMessage msg) {
+        var sessions = gameSessions.get(gameID);
+        if (sessions == null){
+            return;
+        }
+
+        String json = gson.toJson(msg);
+        for (WsContext c : sessions) {
+            if (c != sender) {
+                c.send(json);
+            }
+        }
     }
 }

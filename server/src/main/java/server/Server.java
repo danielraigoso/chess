@@ -115,7 +115,7 @@ public class Server {
 
         //websocket stuff?
 
-        var wsHandler = new GameWebSocketHandler();
+        var wsHandler = new GameWebSocketHandler(gameSvc);
         javalin.ws("/ws", ws -> {
             ws.onConnect(wsHandler::onConnect);
             ws.onClose(wsHandler::onClose);
