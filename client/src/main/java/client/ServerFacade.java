@@ -125,4 +125,8 @@ public class ServerFacade {
             throw new RuntimeException(response.body());
         }
     }
+
+    public String getWsUrl() {
+        return baseUrl.replaceFirst("^http", "ws") + "/ws";
+    }
 }
