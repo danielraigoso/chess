@@ -20,8 +20,7 @@ public class GameWebSocketHandler {
     private final Gson gson = new Gson();
     private final GameService gameService;
 
-    private final Map<Integer, Set<WsContext> gameSessions = new ConcurrentHashMap<>();
-
+    private final Map<Integer, Set<WsContext>> gameSessions = new ConcurrentHashMap<>();
     private final Map<WsContext, Integer> sessionGame = new ConcurrentHashMap<>();
 
     public GameWebSocketHandler(GameService gameService) {
@@ -33,10 +32,8 @@ public class GameWebSocketHandler {
     }
 
     public void onClose(WsCloseContext ctx){
-            removeFromGame(ctx);
     }
     public void onError(WsErrorContext ctx){
-            removeFromeGame(ctx);
     }
 
     public void onMessage(WsMessageContext ctx) {
@@ -44,9 +41,9 @@ public class GameWebSocketHandler {
             var command = gson.fromJson(ctx.message(),UserGameCommand.class);
             switch (command.getCommandType()) {
                 case CONNECT -> handleConnect(ctx, command);
-                case MAKE_MOVE -> handleMakeMove(ctx,command);
-                case LEAVE -> handleLeave(ctx,command);
-                case RESIGN -> handleResign(ctx,command);
+                // case MAKE_MOVE -> handleMakeMove(ctx,command);
+                // case LEAVE -> handleLeave(ctx,command);
+                // case RESIGN -> handleResign(ctx,command);
             }
         } catch (ServiceException | DataAccessException ex) {
             ctx.send(gson.toJson(ServerMessage.error(ex.getMessage())));
@@ -56,8 +53,7 @@ public class GameWebSocketHandler {
     }
 
     //helper handlers
-
-    private void handleConnect(WsConnectContext ctx, UserGameCommand cmd)
+    private void handleConnect(Session session, UserGameCommand cmd)
         throws ServiceException, DataAccessException {
 
         int gameID = cmd.getGameID();

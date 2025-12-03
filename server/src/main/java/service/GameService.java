@@ -86,8 +86,10 @@ public class GameService {
     }
 
     //phase 6 websocket helps
-    public ChessGame loadGameState(String authToken, int gameID) throws ServiceException, DataAccessException {
+    public ChessGame loadGameState(String authToken, int gameID)
+            throws ServiceException, DataAccessException {
 
+        requireAuth(authToken);
         var gameData = db.games().find(gameID);
         if (gameData == null) {
             throw new ServiceException(400, "Error: bad request");
@@ -99,8 +101,8 @@ public class GameService {
             game.getBoard().resetBoard();
 
             var updated = new GameData(
-                    GameData.gameID(),
-                    GameData.whiteUsername(),
+                    gameData.gameID(),
+                    gameData.whiteUsername(),
                     gameData.blackUsername(),
                     gameData.gameName(),
                     game
