@@ -4,6 +4,8 @@ import chess.*;
 import model.*;
 import ui.EscapeSequences;
 import websocket.*;
+import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.*;
@@ -231,9 +233,12 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
             facade.joinGame(authToken, color, game.gameID());
             System.out.printf("Joined '%s' as %s. %n", game.gameName(), color);
 
-            ChessGame cg = new ChessGame();
-            cg.getBoard().resetBoard();
-            showGameBoard(cg, color);
+            //ChessGame cg = new ChessGame();
+            //cg.getBoard().resetBoard();
+            //showGameBoard(cg, color);
+
+            startGameplay(game.gameID(), color, false);
+
         } catch (NumberFormatException nfe) {
             System.out.println("Game number must be a number");
         } catch (IOException | InterruptedException e ){
@@ -258,13 +263,14 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
             }
             GameData game = cachedGames.get(num -1);
 
-            facade.joinGame(authToken, ChessGame.TeamColor.WHITE, game.gameID());
+            // facade.joinGame(authToken, ChessGame.TeamColor.WHITE, game.gameID());
             System.out.printf("Observing '%s' .%n", game.gameName());
 
-            ChessGame cg = new ChessGame();
-            cg.getBoard().resetBoard();
+            //ChessGame cg = new ChessGame();
+            //cg.getBoard().resetBoard();
 
-            showGameBoard(cg, ChessGame.TeamColor.WHITE);
+            startGameplay(game.gameID(), ChessGame.TeamColor.WHITE, true);
+            //showGameBoard(cg, ChessGame.TeamColor.WHITE);
         } catch (NumberFormatException nfe) {
             System.out.println("Game number must be a number");
         } catch (IOException | InterruptedException e ){
@@ -276,6 +282,181 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
 
     //drawing the game board
 
+    private void startGameplay(int gameId, ChessGame.TeamColor perspective, boolean observing) {
+        this.currentGameId = gameId;
+        this.currentPerspective = perspective;
+        this.currentGame = null;
+        this.inGame = true;
+
+        this.ws = new WebSocketComms(facade.getWsUrl(), this);
+
+        UserGameCommand connect = new UserGameCommand(
+                UserGameCommand.CommandType.CONNECT, authToken, gameId);
+        ws.send(connect);
+        gameLoop(observing);
+    }
+
+    private void gameLoop(boolean observing){
+        printGameHelp(observing);
+
+        while(inGame) {
+            System.out.print("[GAME] > ");
+            String cmd = scanner.nextLine().trim().toLowerCase();
+
+            switch (cmd) {
+                case "help", "h" -> printGameHelp(observing);
+                case "redraw" -> redrawBoard();
+                case "highlight" -> handleHighlight();
+                case "move" -> {
+                    if (observing) {
+                        System.out.println("observers cannot make moves.");
+                    } else {
+                        handleUserMove();
+                    }
+                }
+                case "resign" -> {
+                    if (observing) {
+                        System.out.println("observers cannot resign.");
+                    } else {
+                        handleResign();
+                    }
+                }
+                case "leave" -> handleLeave();
+                default -> System.out.println("Unknown command. Type 'help'.");
+            }
+        }
+
+        if (ws != null) {
+            ws.close();
+        }
+        currentGame = null;
+    }
+
+    private void printGameHelp(boolean observing) {
+        System.out.println("""
+                === gameplay commands ===
+                help (h)     - show this help text
+                redraw       - redraw the chess board
+                highlight    - highlight legal moves for a piece
+                move         - make a move (players only)
+                resign       - resign the game (players only)
+                leave        - leave the game and return to menu
+                """);
+        if (observing) {
+            System.out.println("You are observing: you can 'highlight' and 'redraw', but not 'move' or 'resign'.");
+        }
+    }
+
+
+    private void handleUserMove() {
+        if (currentGame == null) {
+            System.out.println("Game not loaded yet");
+            return;
+        }
+
+        System.out.print("Enter move, for ex. a1 a2");
+        String line = scanner.nextLine().trim();
+        String[] parts = line.split("\\s+");
+        if (parts.length != 2) {
+            System.out.println("Please enter exactly two squares like a1 a2");
+            return;
+        }
+
+        ChessPosition from = parsePosition(parts[0]);
+        ChessPosition to = parsePosition(parts[1]);
+
+        if (from == null || to == null) {
+            System.out.println("Bad square format. Use a-h + 1-8, a1 a2");
+            return;
+        }
+
+        ChessMove move = new ChessMove(from, to , null);
+        UserGameCommand cmd = new UserGameCommand(
+                UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameId, move);
+        ws.send(cmd);
+    }
+
+    private void handleResign() {
+        System.out.print("type yes to confirm resign: ");
+        String confirm = scanner.nextLine().trim().toLowerCase();
+        if (!confirm.equals("yes") && !confirm.equals("y")) {
+            System.out.println("Resign canceled.");
+            return;
+        }
+
+        UserGameCommand cmd = new UserGameCommand(
+                UserGameCommand.CommandType.RESIGN, authToken, currentGameId);
+        ws.send(cmd);
+    }
+
+    private void handleLeave() {
+        UserGameCommand cmd = new UserGameCommand(
+                UserGameCommand.CommandType.LEAVE, authToken, currentGameId);
+        ws.send(cmd);
+        inGame = false;
+    }
+
+    private void handleHighlight() {
+        if (currentGame == null) {
+            System.out.println("game not loaded yet");
+            return;
+        }
+
+        System.out.print("Square to highlight moves from : ");
+        String sq = scanner.nextLine().trim();
+        ChessPosition pos = parsePosition(sq);
+        if (pos == null) {
+            System.out.println("bad square format, type something like a1");
+            return;
+        }
+
+        Collection<ChessMove> moves = currentGame.validMoves(pos);
+        if (moves == null || moves.isEmpty()) {
+            System.out.println("no legal moves for that piece");
+            return;
+        }
+
+        Set<ChessPosition> highlights = new HashSet<>();
+        highlights.add(pos);
+        for (ChessMove m : moves) {
+            highlights.add(m.getEndPosition());
+        }
+
+        System.out.print(EscapeSequences.ERASE_SCREEN);
+        drawBoard(currentGame.getBoard(), currentPerspective, highlights);
+        System.out.println();
+    }
+
+    private void redrawBoard() {
+        if (currentGame == null) {
+            System.out.print("game not loaded yet");
+            return;
+        }
+
+        System.out.print(EscapeSequences.ERASE_SCREEN);
+        drawBoard(currentGame.getBoard(), currentPerspective, null);
+        System.out.println();
+    }
+
+    private ChessPosition parsePosition(String s) {
+        if (s == null || s.length() != 2) {
+            return null;
+        }
+
+        char file = Character.toLowerCase(s.charAt(0));
+        char rank = s.charAt(1);
+        if (file < 'a' || file > 'h') {
+            return null;
+        }
+        if (rank <'1' || rank > '8' ) {
+            return null;
+        }
+
+        int col = file - 'a' + 1;
+        int row = rank - '0';
+        return new ChessPosition(row, col);
+    }
+
     private void showGameBoard(ChessGame game, ChessGame.TeamColor perspective) {
         System.out.print(EscapeSequences.ERASE_SCREEN);
         System.out.printf("Press ENTER to return. %n", perspective);
@@ -284,16 +465,16 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
         System.out.print(EscapeSequences.ERASE_SCREEN);
     }
 
-    private void drawBoard(ChessBoard board, ChessGame.TeamColor perspective) {
+    private void drawBoard(ChessBoard board, ChessGame.TeamColor perspective, Set<ChessPosition> highlights>) {
         if (perspective == ChessGame.TeamColor.WHITE) {
-            drawWhiteBoard(board);
+            drawWhiteBoard(board, highlights);
         } else {
-            drawBlackBoard(board);
+            drawBlackBoard(board, highlights);
         }
         System.out.print(EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR + "\n");
     }
 
-    private void drawWhiteBoard(ChessBoard board){
+    private void drawWhiteBoard(ChessBoard board, Set<ChessPosition> highlights){
         System.out.print("   ");
         for (char file = 'a'; file <= 'h'; file++) {
             System.out.print(" " + file + "  ");
@@ -304,7 +485,7 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
             System.out.print(" " + row + " ");
             for (int col = 1; col <= 8; col++) {
                 boolean light = (row + col) % 2 == 0;
-                printSquare(board,row,col,light);
+                printSquare(board,row,col,light, highlights);
             }
             System.out.print(" " + row);
             System.out.println();
@@ -317,7 +498,7 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
         System.out.println();
     }
 
-    private void drawBlackBoard(ChessBoard board){
+    private void drawBlackBoard(ChessBoard board, Set<ChessPosition> highlights){
         System.out.print("   ");
         for (char file = 'h'; file >= 'a'; file--) {
             System.out.print(" " + file + "  ");
@@ -328,7 +509,7 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
             System.out.print(" " + row + " ");
             for (int col = 8; col >= 1; col--) {
                 boolean light = (row + col) % 2 == 0;
-                printSquare(board,row,col,light);
+                printSquare(board,row,col,light, highlights);
             }
             System.out.print(" " + row);
             System.out.println();
@@ -341,12 +522,22 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
         System.out.println();
     }
 
-    private void printSquare(ChessBoard board, int row, int col, boolean lightSquare){
+    private void printSquare(ChessBoard board, int row, int col, boolean lightSquare,
+                             Set<ChessPosition> highlights){
+
         ChessPosition pos = new ChessPosition(row, col);
         ChessPiece piece = board.getPiece(pos);
 
-        String bg = lightSquare ? EscapeSequences.SET_BG_COLOR_DARK_GREY
-                : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+        boolean highlighted = highlights != null && highlights.contains(pos);
+
+        String bg;
+
+        if (highlighted) {
+            bg = EscapeSequences.SET_BG_COLOR_GREEN;
+        } else {
+            bg = lightSquare ? EscapeSequences.SET_BG_COLOR_DARK_GREY
+                    : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+        }
 
         String fg = EscapeSequences.SET_TEXT_COLOR_WHITE;
         String glyph = EscapeSequences.EMPTY;
@@ -397,5 +588,23 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
         }
 
         return raw;
+    }
+
+    @Override
+    public synchronized void notify(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case LOAD_GAME ->  {
+                this.currentGame = message.getGame();
+                redrawBoard();
+            }
+            case NOTIFICATION -> {
+                System.out.println();
+                System.out.println("NOTIFICATION : " + message.getMessage());
+            }
+            case ERROR -> {
+                System.out.println();
+                System.out.println("Server error: " + message.getErrorMessage());
+            }
+        }
     }
 }
