@@ -1,19 +1,17 @@
 package server;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import io.javalin.*;
 import model.UserData;
 import model.GameData;
 import dataaccess.DataAccess;
 import dataaccess.SqlDataAccessDAO;
-import dataaccess.DataAccessDAO;
 import service.ServiceException;
 import service.UserService;
 import service.GameService;
+import websocket.GameWebSocketHandler;
 
 import javax.swing.*;
-import java.security.Provider;
 
 public class Server {
 
@@ -113,6 +111,16 @@ public class Server {
             } catch (ServiceException se) {
                     ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
             }
+        });
+
+        //websocket stuff?
+
+        var wsHandler = new GameWebSocketHandler();
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(wsHandler::onConnect);
+            ws.onClose(wsHandler::onClose);
+            ws.onError(wsHandler::onError);
+            ws.onMessage(wsHandler::onMessage);
         });
     }
     //hurray
