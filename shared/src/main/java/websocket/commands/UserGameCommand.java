@@ -25,6 +25,13 @@ public class UserGameCommand {
         this.gameID = gameID;
     }
 
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, ChessMove move) {
+        this.commandType = commandType;
+        this.authToken = authToken;
+        this.gameID = gameID;
+        this.move = move;
+    }
+
     public enum CommandType {
         CONNECT,
         MAKE_MOVE,

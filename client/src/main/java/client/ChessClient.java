@@ -273,8 +273,6 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
             //showGameBoard(cg, ChessGame.TeamColor.WHITE);
         } catch (NumberFormatException nfe) {
             System.out.println("Game number must be a number");
-        } catch (IOException | InterruptedException e ){
-            System.out.println("Error observing da game: " + e.getMessage());
         } catch (RuntimeException e) {
             System.out.println(cleanErrorMessage(e.getMessage()));
         }
@@ -457,15 +455,15 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
         return new ChessPosition(row, col);
     }
 
-    private void showGameBoard(ChessGame game, ChessGame.TeamColor perspective) {
-        System.out.print(EscapeSequences.ERASE_SCREEN);
-        System.out.printf("Press ENTER to return. %n", perspective);
-        drawBoard(game.getBoard(), perspective);
-        scanner.nextLine();
-        System.out.print(EscapeSequences.ERASE_SCREEN);
-    }
+//    private void showGameBoard(ChessGame game, ChessGame.TeamColor perspective) {
+//        System.out.print(EscapeSequences.ERASE_SCREEN);
+//        System.out.printf("Press ENTER to return. %n", perspective);
+//        drawBoard(game.getBoard(), perspective);
+//        scanner.nextLine();
+//        System.out.print(EscapeSequences.ERASE_SCREEN);
+//    }
 
-    private void drawBoard(ChessBoard board, ChessGame.TeamColor perspective, Set<ChessPosition> highlights>) {
+    private void drawBoard(ChessBoard board, ChessGame.TeamColor perspective, Set<ChessPosition> highlights) {
         if (perspective == ChessGame.TeamColor.WHITE) {
             drawWhiteBoard(board, highlights);
         } else {
