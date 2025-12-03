@@ -2,6 +2,7 @@ package websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
@@ -88,8 +89,42 @@ public class GameWebSocketHandler {
     }
 
     private void handleMakeMove(WsContext ctx, UserGameCommand cmd)
-        throws ServiceException, DataAccessException {
+            throws ServiceException, DataAccessException, InvalidMoveException {
         int gameID = cmd.getGameID();
-        String auth
+        String auth = cmd.getAuthToken();
+        ChessMove move = cmd.getMove();
+
+        GameService.MoveResult result = gameService.moveMove(auth, gameID, move);
+
+        ServerMessage loadMsg = ServerMessage.loadGame(result.game());
+        broadcastToAll(gameID, loadMsg);
+
+        String moveNotif = result.moveNotif();
+        if (moveNotif != null) {
+            broadcastToOthers(gameID, ctx, ServerMessage.notification(moveNotif));
+        }
+
+        String extra = result.extraNotif();
+        if (extra != null) {
+            broadcastToAll(gameID, ServerMessage.notification(extra));
+        }
+    }
+
+    private void handleLeave(WsContext ctx, UserGameCommand cmd)
+        throws ServiceException, DataAccessException {
+
+        int gameID = cmd.getGameID();
+        String auth = cmd.getAuthToken();
+
+        gameService.leaveGame(auth, gameID);
+
+        sessionGame.remove(ctx);
+        var set = gameSessions.get(gameID);
+
+        if (set != null) {
+            set.remove(ctx);
+        }
+
+        String msg = gameService.buildLeaveMessage(auth, gameID)
     }
 }
