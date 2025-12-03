@@ -6,13 +6,11 @@ import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
-import server.Server;
 import service.GameService;
 import service.ServiceException;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
-import javax.xml.crypto.Data;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
