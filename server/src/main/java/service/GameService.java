@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import chess.InvalidMoveException;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
@@ -270,7 +271,23 @@ public class GameService {
         return username + " left the game";
     }
 
-    public string
+    public String buildResignMessage(String authToken, int gameID)
+        throws ServiceException, DataAccessException {
+        String username = requireAuth(authToken);
+        return username + " resigned";
+    }
+
+    public String buildMoveDescription(String username, ChessMove move)
+        throws ServiceException, DataAccessException {
+
+        ChessPosition from = move.getStartPosition();
+        ChessPosition to = move.getEndPosition();
+
+        return String.format("%s moved from (%d, %d) to (%d, %d)",
+                username,
+                from.getRow(), from.getColumn(),
+                to.getRow(), to.getColumn());
+    }
 
     //helper method
     private String requireAuth(String token)
