@@ -196,8 +196,26 @@ public class GameService {
             throw new ServiceException(400, "error bad request");
         }
 
-        String white = gameData.whiteUsername()
+        String white = gameData.whiteUsername();
+        String black = gameData.blackUsername();
+
+        if (username.equals(white)) {
+            white = null;
+        } else if (username.equals(black)) {
+            black = null;
+        }
+
+        var updated = new GameData(
+                gameData.gameID(),
+                white,
+                black,
+                gameData.gameName(),
+                gameData.game()
+        );
+        db.games().update(updated);
     }
+
+    public void
 
     //helper method
     private String requireAuth(String token)
