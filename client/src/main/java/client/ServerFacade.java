@@ -129,4 +129,5 @@ public class ServerFacade {
     public String getWsUrl() {
         return baseUrl.replaceFirst("^http", "ws") + "/ws";
     }
+    //hurray
 }
