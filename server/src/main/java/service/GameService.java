@@ -215,7 +215,36 @@ public class GameService {
         db.games().update(updated);
     }
 
-    public void
+    public void resignGame(String authToken, int gameID)
+        throws ServiceException, DataAccessException {
+
+        String username = requireAuth(authToken);
+        var gameData = db.games().find(gameID);
+
+        if(gameData == null) {
+            throw new ServiceException(400, "error bad reqeust");
+        }
+
+        boolean isWhite = username.equals(gameData.whiteUsername());
+        boolean isBlack = username.equals(gameData.blackUsername());
+
+        if (!isWhite && !isBlack) {
+            throw new ServiceException(400, "observers cannot resign");
+        }
+
+        var updated = new GameData(
+                gameData.gameID(),
+                null,
+                null,
+                gameData.gameName(),
+                gameData.game()
+        );
+        db.games().update(updated);
+    }
+
+    //notification helps
+
+    public String
 
     //helper method
     private String requireAuth(String token)
