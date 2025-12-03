@@ -28,12 +28,25 @@ public class GameWebSocketHandler {
     }
 
     public void onConnect(WsConnectContext ctx) {
-
+        System.out.printf("Websocket connected: %s%n", ctx.getSessionID());
     }
 
     public void onClose(WsCloseContext ctx){
+        WsContext ws = ctx;
+        Integer gameID = sessionGame.remove(ws);
+        if (gameID != null) {
+            var set = gameSessions.get(gameID);
+            if (set != null) {
+                set.remove(ws);
+            }
+        }
+
+        System.out.printf("Websocket closed: %s%n", ctx.getSessionID());
     }
+
     public void onError(WsErrorContext ctx){
+
+        System.out.printf
     }
 
     public void onMessage(WsMessageContext ctx) {
