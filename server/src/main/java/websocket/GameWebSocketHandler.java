@@ -9,6 +9,8 @@ import service.GameService;
 import service.ServiceException;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
+
+import javax.xml.crypto.Data;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,4 +56,13 @@ public class GameWebSocketHandler {
     }
 
     //helper handlers
+
+    private void handleConnect(WsConnectContext ctx, UserGameCommand cmd)
+        throws ServiceException, DataAccessException {
+
+        int gameID = cmd.getGameID();
+        String auth = cmd.getAuthToken();
+
+
+    }
 }

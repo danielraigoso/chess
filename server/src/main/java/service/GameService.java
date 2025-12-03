@@ -3,11 +3,17 @@ package service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
+
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
+
+import javax.xml.crypto.Data;
 
 
 public class GameService {
@@ -77,6 +83,122 @@ public class GameService {
             }
         }
     }
+
+    //phase 6 websocket helps
+    public ChessGame loadGameState(String authToken, int gameID) throws ServiceException, DataAccessException {
+
+        var gameData = db.games().find(gameID);
+        if (gameData == null) {
+            throw new ServiceException(400, "Error: bad request");
+        }
+
+        ChessGame game = gameData.game();
+        if (game == null) {
+            game = new ChessGame();
+            game.getBoard().resetBoard();
+
+            var updated = new GameData(
+                    GameData.gameID(),
+                    GameData.whiteUsername(),
+                    gameData.blackUsername(),
+                    gameData.gameName(),
+                    game
+            );
+            db.games().update(updated);
+        }
+        return game;
+    }
+
+    public record MoveResult(ChessGame game, String moveNotif, String extraNotif){}
+
+    public MoveResult moveMove(String authToken, int gameID, ChessMove move)
+            throws ServiceException, DataAccessException, InvalidMoveException {
+
+        String username = requireAuth(authToken);
+
+        var gameData = db.games().find(gameID);
+        if(gameData == null) {
+            throw new ServiceException(400, "Error: bad request");
+        }
+
+        ChessGame game = gameData.game();
+        if (game == null) {
+            game = new ChessGame();
+            game.getBoard().resetBoard();
+        }
+
+        if (gameData.whiteUsername() == null || gameData.blackUsername() == null ||
+                game.isInCheckmate(ChessGame.TeamColor.WHITE) ||
+                game.isInCheckmate(ChessGame.TeamColor.BLACK) ||
+                game.isInStalemate(ChessGame.TeamColor.WHITE) ||
+                game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            throw new ServiceException(400, "Error: game over");
+        }
+
+        ChessGame.TeamColor playerColor;
+        if (username.equals(gameData.whiteUsername())) {
+            playerColor = ChessGame.TeamColor.WHITE;
+        } else if (username.equals(gameData.blackUsername())) {
+            playerColor = ChessGame.TeamColor.BLACK;
+        } else {
+            throw new ServiceException(400, "Error: not a player in the game");
+        }
+
+        if (game.getTeamTurn() != playerColor) {
+            throw new ServiceException(400, "Error: wrong turn");
+        }
+
+        try {
+            game.makeMove(move);
+        } catch (InvalidMoveException e) {
+            throw new ServiceException(400, "Error: invalid move");
+        }
+
+        var updated = new GameData(
+                gameData.gameID(),
+                gameData.whiteUsername(),
+                gameData.blackUsername(),
+                gameData.gameName(),
+                game
+        );
+
+        db.games().update(updated);
+
+        String moveText = buildMoveDescription(username, move);
+
+        ChessGame.TeamColor opponent = (playerColor == ChessGame.TeamColor.WHITE)
+                ? ChessGame.TeamColor.BLACK
+                : ChessGame.TeamColor.WHITE;
+
+        String opponentName = (opponent == ChessGame.TeamColor.WHITE)
+                ? gameData.whiteUsername()
+                : gameData.blackUsername();
+
+        String extra = null;
+
+        if(game.isInCheckmate(opponent)) {
+            extra = opponentName + " is in checkmate";
+        } else if (game.isInStalemate(opponent)) {
+            extra = opponentName + " is in stalemate";
+        } else if (game.isInCheck(opponent)) {
+            extra = opponentName + " is in check";
+        }
+
+        return new MoveResult(game, moveText, extra);
+    }
+
+    public void leaveGame(String authToken, int gameID)
+        throws ServiceException, DataAccessException {
+        String username = requireAuth(authToken);
+        var gameData = db.games().find(gameID);
+
+        if (gameData == null) {
+            throw new ServiceException(400, "error bad request");
+        }
+
+        String white = gameData.whiteUsername()
+    }
+
     //helper method
     private String requireAuth(String token)
             throws ServiceException, DataAccessException {
