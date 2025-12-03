@@ -21,4 +21,37 @@ public class GameWebSocketHandler {
     private final Map<Integer, Set<WsContext> gameSessions = new ConcurrentHashMap<>();
 
     private final Map<WsContext, Integer> sessionGame = new ConcurrentHashMap<>();
+
+    public GameWebSocketHandler(GameService gameService) {
+        this.gameService = gameService;
+    }
+
+    public void onConnect(WsConnectContext ctx) {
+
+    }
+
+    public void onClose(WsCloseContext ctx){
+            removeFromGame(ctx);
+    }
+    public void onError(WsErrorContext ctx){
+            removeFromeGame(ctx);
+    }
+
+    public void onMessage(WsMessageContext ctx) {
+        try {
+            var command = gson.fromJson(ctx.message(),UserGameCommand.class);
+            switch (command.getCommandType()) {
+                case CONNECT -> handleConnect(ctx, command);
+                case MAKE_MOVE -> handleMakeMove(ctx,command);
+                case LEAVE -> handleLeave(ctx,command);
+                case RESIGN -> handleResign(ctx,command);
+            }
+        } catch (ServiceException | DataAccessException ex) {
+            ctx.send(gson.toJson(ServerMessage.error(ex.getMessage())));
+        } catch (Exception ex) {
+            ctx.send(gson.toJson(ServerMessage.error("Error: " + ex.getMessage())));
+        }
+    }
+
+    //helper handlers
 }
