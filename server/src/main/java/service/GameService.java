@@ -244,7 +244,29 @@ public class GameService {
 
     //notification helps
 
-    public String
+    public String buildConnectMessage(String authToken, int gameID)
+        throws ServiceException, DataAccessException {
+
+        String username = requireAuth(authToken);
+        var gameData = db.games().find(gameID);
+        if (gameData == null) {
+            throw new ServiceException(400, "bad request");
+        }
+
+        if (username.equals(gameData.whiteUsername())) {
+            return username + " connected as WHITE";
+        } else if (username.equals(gameData.blackUsername())) {
+            return username + " connected as BLACK";
+        } else {
+            return username + "connected as an observer";
+        }
+    }
+
+    public String buildLeaveMessage(String authToken, int gameID)
+        throws ServiceException, DataAccessException {
+
+        String username =
+    }
 
     //helper method
     private String requireAuth(String token)
