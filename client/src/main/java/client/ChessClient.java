@@ -3,7 +3,6 @@ package client;
 import chess.*;
 import model.*;
 import ui.EscapeSequences;
-import websocket.*;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -298,7 +297,6 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
         printGameHelp(observing);
 
         while(inGame) {
-            System.out.print("[GAME] > ");
             String cmd = scanner.nextLine().trim().toLowerCase();
 
             switch (cmd) {
@@ -352,7 +350,7 @@ public class ChessClient implements WebSocketComms.ServerMessageObserver {
             return;
         }
 
-        System.out.print("Enter move, for ex. a1 a2");
+        System.out.print("Enter move, for ex. a1 a2: ");
         String line = scanner.nextLine().trim();
         String[] parts = line.split("\\s+");
         if (parts.length != 2) {
