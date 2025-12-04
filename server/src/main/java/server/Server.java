@@ -32,7 +32,7 @@ public class Server {
             });
         });
         // Register your endpoints and exception handlers here.
-
+//push
         // Exception handlers that always return a JSON { "message": ... }
         javalin.exception(ServiceException.class, (e, ctx) -> {
             ctx.status(e.statusCode());
