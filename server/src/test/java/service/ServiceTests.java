@@ -45,23 +45,6 @@ public class ServiceTests {
         assertThrows(ServiceException.class, () -> userSvc.register(user));
     }
 
-    //login success and fail
-//    @Test
-//    public void loginSuccess() throws Exception {
-//        var user = new UserData("chris", "pw", "c@c.com");
-//        userSvc.register(user);
-//        var auth = userSvc.login(user);
-//        assertNotNull(auth.authToken());
-//    }
-
-//    @Test
-//    public void loginFail() throws Exception {
-//        var user = new UserData("chris", "pw", "c@c.com");
-//        userSvc.register(user);
-//        var wrong = new UserData("chris", "wrongpw", "c@c.com");
-//        assertThrows(ServiceException.class, () -> userSvc.login(wrong));
-//    }
-
     //logout success and fail
     @Test
     public void logOutSuccess() throws Exception {

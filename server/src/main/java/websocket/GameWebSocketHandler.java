@@ -153,7 +153,9 @@ public class GameWebSocketHandler {
 
     private void broadcastToAll(int gameID, ServerMessage msg) {
         var sessions = gameSessions.get(gameID);
-        if (sessions == null) return;
+        if (sessions == null) {
+            return;
+        }
 
         String json = gson.toJson(msg);
         for (String sid : sessions) {

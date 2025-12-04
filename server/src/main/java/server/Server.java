@@ -24,7 +24,6 @@ public class Server {
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
-
         // Register your endpoints and exception handlers here.
 
         // Exception handlers that always return a JSON { "message": ... }
@@ -38,7 +37,6 @@ public class Server {
             ctx.contentType("application/json");
             ctx.result(gson.toJson(new Message("Error: " + e.getMessage())));
         });
-// hurray passed all my phase 4 tests, time to write my own
         // Register POST
         javalin.post("/user", ctx -> {
             try {
@@ -49,7 +47,6 @@ public class Server {
                 ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
             }
         });
-
         // login  POST
         javalin.post("/session", ctx -> {
             try {
@@ -60,7 +57,6 @@ public class Server {
                 ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
             }
         });
-
         // logout DELETE
         javalin.delete("/session", ctx -> {
             try {
@@ -71,12 +67,10 @@ public class Server {
                 ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
             }
         });
-
         javalin.delete("/db", ctx -> {
             clearSvc.clear();
             ctx.status(200).result(gson.toJson(new Empty()));
         });
-
         // game stuff
         javalin.post("/game", ctx -> {
             try {
@@ -88,7 +82,6 @@ public class Server {
                 ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
             }
         });
-
         // get game
         javalin.get("/game", ctx -> {
             try {
@@ -99,7 +92,6 @@ public class Server {
                 ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
             }
         });
-
         //put
         javalin.put("/game", ctx -> {
             try {
@@ -112,9 +104,7 @@ public class Server {
                     ctx.status(se.statusCode()).result(gson.toJson(new Message(se.getMessage())));
             }
         });
-
         //websocket stuff?
-
         var wsHandler = new GameWebSocketHandler(gameSvc);
         javalin.ws("/ws", ws -> {
             ws.onConnect(wsHandler::onConnect);
