@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.*;
 import model.UserData;
 import model.GameData;
@@ -10,6 +11,7 @@ import service.ServiceException;
 import service.UserService;
 import service.GameService;
 import websocket.GameWebSocketHandler;
+import java.time.Duration;
 
 import javax.swing.*;
 
@@ -23,16 +25,21 @@ public class Server {
     private final GameService gameSvc = new GameService(db);
 
     public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        javalin = Javalin.create(config -> {
+            config.staticFiles.add("web");
+            config.jetty.modifyWebSocketServletFactory(wsFactory -> {
+                wsFactory.setIdleTimeout(Duration.ofMinutes(30));
+            });
+        });
         // Register your endpoints and exception handlers here.
 
         // Exception handlers that always return a JSON { "message": ... }
-        javalin.exception(service.ServiceException.class, (e, ctx) -> {
+        javalin.exception(ServiceException.class, (e, ctx) -> {
             ctx.status(e.statusCode());
             ctx.contentType("application/json");
             ctx.result(gson.toJson(new Message(e.getMessage())));
         });
-        javalin.exception(dataaccess.DataAccessException.class, (e, ctx) -> {
+        javalin.exception(DataAccessException.class, (e, ctx) -> {
             ctx.status(500);
             ctx.contentType("application/json");
             ctx.result(gson.toJson(new Message("Error: " + e.getMessage())));
